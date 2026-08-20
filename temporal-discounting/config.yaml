@@ -1,0 +1,63 @@
+# Central config for the Waiting Game intertemporal-choice pipeline.
+# All scripts read from this file so grids/models/N stay consistent everywhere.
+
+ollama:
+  base_url: "http://localhost:11434"
+  keep_alive: "5m"        # how long Ollama keeps a model resident after last request
+  request_timeout_s: 120   # CoT completions take longer than the 5-token direct-answer mode
+  max_retries: 3
+  retry_backoff_s: 2       # exponential backoff base: sleep = retry_backoff_s * (2 ** attempt)
+
+models:
+  - qwen2.5:1.5b-instruct
+  - qwen2.5:3b-instruct
+  - qwen2.5:7b-instruct
+
+waiting_game:
+  later_amount_dollars: 1000                       # fixed "later" payoff, matches Rachlin 1991 design
+  delay_grid_months: [1, 3, 6, 12, 24, 60, 120]     # 7 delays, ~1mo to 10yr, log-spaced
+  amount_grid_dollars: [0, 150, 300, 450, 600, 750, 900]  # 7 sooner amounts spanning $0-$1000
+  n_samples_per_cell: 30                            # completions per (delay, amount) cell per model
+  temperature: 1.0
+  num_predict: 5                                    # short completion budget (only need "A"/"B")
+  system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. When answering, respond with only the letter of the option
+    you choose (A or B). Do not explain your choice.
+  random_seed: 20260820                             # seeds order randomization for reproducibility
+
+  # --- Chain-of-thought (CoT) reasoning mode ---
+  # Same trial grid/prompts as above, but the system prompt now requires the
+  # model to reason step by step before committing to a final letter. Used
+  # via `--mode cot` on run_experiment.py / parse_responses.py / etc., so the
+  # direct-answer data collected above is never overwritten.
+  cot_system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. Think step by step: compare the two amounts and how long you
+    would have to wait for each, and reason about which is the better deal.
+    After your reasoning, end your response with a final line, formatted
+    exactly as "FINAL ANSWER: A" or "FINAL ANSWER: B", with no other text on
+    that line.
+  cot_num_predict: 300                              # reasoning needs far more tokens than the 5-token direct mode
+
+competence_checks:
+  monotonicity_tolerance: 0.0        # allowed drop in P(sooner) between adjacent amounts before counting as a violation
+  max_violations_per_delay: 1        # violations tolerated per delay row before that delay fails monotonicity
+  max_p_sooner_at_zero_amount: 0.5   # model fails money-preference check if P(choose $0 now) exceeds this at any delay
+
+fitting:
+  n_bootstrap: 1000
+  bootstrap_seed: 42
+
+human_benchmark:
+  rachlin_1991_k_per_month: 0.01     # approximate hyperbolic k reported in Rachlin et al. (1991), for reference overlay only
+
+visualization:
+  n_sample_trials_to_plot_per_cell: 10   # how many raw individual trials to overlay as jittered dots per (delay, amount) cell
+  trial_selection_seed: 123
+
+paths:
+  data_raw_dir: "data/raw"
+  data_processed_dir: "data/processed"
+  results_tables_dir: "results/tables"
+  results_figures_dir: "results/figures"
