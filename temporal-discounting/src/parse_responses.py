@@ -16,7 +16,7 @@ import re
 import pandas as pd
 
 from config_utils import load_config, resolve_dir_path, mode_suffix
-from run_experiment import safe_filename_for_model
+from run_experiment import REASONING_MODES, safe_filename_for_model
 
 # Tried in priority order. For CoT text, the reasoning body often mentions
 # both option letters many times, so the tagged "FINAL ANSWER" line is
@@ -122,7 +122,7 @@ def compute_parse_failure_rate(parsed_rows):
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
-    arg_parser.add_argument("--mode", choices=["direct", "cot"], default="direct")
+    arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
@@ -142,7 +142,7 @@ def main():
         parse_failure_rate = compute_parse_failure_rate(model_parsed_rows)
         message = (f"[{model_name} / {args.mode}] parsed {len(model_parsed_rows)} trials, "
                     f"parse-failure rate = {parse_failure_rate:.1%}")
-        if args.mode == "cot":
+        if args.mode == "cot":  # only CoT prompts require the FINAL ANSWER tag
             n_with_tag = sum(1 for row in model_parsed_rows if row["final_answer_tag_found"])
             message += f", FINAL ANSWER tag present = {n_with_tag / len(model_parsed_rows):.1%}"
         print(message)

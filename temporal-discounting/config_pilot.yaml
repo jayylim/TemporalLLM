@@ -1,0 +1,75 @@
+# Small-grid pilot config, currently repurposed to TIME the --mode cot run
+# (the slow one, ~300-token completions) across all 3 models on this machine,
+# so we can extrapolate to the full N=30 x 49-cell x 3-model cot run before
+# committing to it. Writes to separate data/results directories so it never
+# touches the real direct-mode results already collected under config.yaml.
+# Only intended to be invoked with `--mode cot` right now.
+
+ollama:
+  base_url: "http://localhost:11434"
+  keep_alive: "5m"
+  request_timeout_s: 120
+  max_retries: 3
+  retry_backoff_s: 2
+
+models:
+  - qwen2.5:1.5b-instruct
+  - qwen2.5:3b-instruct
+  - qwen2.5:7b-instruct
+
+waiting_game:
+  later_amount_dollars: 1000
+  delay_grid_months: [3, 24]
+  amount_grid_dollars: [0, 450, 900]
+  n_samples_per_cell: 2   # reduced from 3 -> 12 trials/model (still enough to average out per-trial variance)
+  temperature: 1.0
+  num_predict: 5
+  system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. When answering, respond with only the letter of the option
+    you choose (A or B). Do not explain your choice.
+  random_seed: 20260820
+
+  cot_system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. Think step by step: compare the two amounts and how long you
+    would have to wait for each, and reason about which is the better deal.
+    After your reasoning, end your response with a final line, formatted
+    exactly as "FINAL ANSWER: A" or "FINAL ANSWER: B", with no other text on
+    that line.
+  cot_num_predict: 300
+
+  few_shot_example_order_seed: 20260825
+  one_shot_examples:
+    - sooner_amount_dollars: 0
+      delay_months: 18
+      correct_choice: later
+  two_shot_examples:
+    - sooner_amount_dollars: 0
+      delay_months: 18
+      correct_choice: later
+    - sooner_amount_dollars: 980
+      delay_months: 18
+      correct_choice: sooner
+
+competence_checks:
+  monotonicity_tolerance: 0.0
+  max_violations_per_delay: 1
+  max_p_sooner_at_zero_amount: 0.5
+
+fitting:
+  n_bootstrap: 200
+  bootstrap_seed: 42
+
+human_benchmark:
+  rachlin_1991_k_per_month: 0.01
+
+visualization:
+  n_sample_trials_to_plot_per_cell: 3
+  trial_selection_seed: 123
+
+paths:
+  data_raw_dir: "data/raw_pilot"
+  data_processed_dir: "data/processed_pilot"
+  results_tables_dir: "results/tables_pilot"
+  results_figures_dir: "results/figures_pilot"

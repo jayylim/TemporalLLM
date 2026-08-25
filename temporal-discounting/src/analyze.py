@@ -17,8 +17,16 @@ import pandas as pd
 from config_utils import load_config, resolve_dir_path, mode_suffix
 from competence_checks import compute_p_sooner_table
 from fit_discounting import hyperbolic_value
+from run_experiment import REASONING_MODES
 
 MODEL_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
+
+MODE_DISPLAY_LABELS = {
+    "direct": "direct",
+    "cot": "chain-of-thought",
+    "one_shot": "one-shot",
+    "two_shot": "two-shot",
+}
 
 
 def build_comparison_table(fit_df, competence_df):
@@ -52,7 +60,7 @@ def fitted_indifference_curve(k, later_amount_dollars, delay_range_months):
     return hyperbolic_value(later_amount_dollars, delay_range_months, k)
 
 
-def plot_discount_curves(choices_df, comparison_df, config, figures_dir, suffix=""):
+def plot_discount_curves(choices_df, comparison_df, config, figures_dir, suffix="", reasoning_mode="direct"):
     later_amount_dollars = config["waiting_game"]["later_amount_dollars"]
     delay_grid_months = config["waiting_game"]["delay_grid_months"]
     human_k = config["human_benchmark"]["rachlin_1991_k_per_month"]
@@ -90,7 +98,7 @@ def plot_discount_curves(choices_df, comparison_df, config, figures_dir, suffix=
 
     axis.set_xlabel("Delay to later reward (months)")
     axis.set_ylabel(f"Indifference amount now (of ${later_amount_dollars} later)")
-    mode_label = "chain-of-thought" if suffix else "direct"
+    mode_label = MODE_DISPLAY_LABELS.get(reasoning_mode, reasoning_mode)
     axis.set_title(f"Waiting Game: discount curves by model [{mode_label}]")
     axis.legend(fontsize=8, loc="upper right")
     figure.tight_layout()
@@ -104,7 +112,7 @@ def plot_discount_curves(choices_df, comparison_df, config, figures_dir, suffix=
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
-    arg_parser.add_argument("--mode", choices=["direct", "cot"], default="direct")
+    arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
@@ -128,7 +136,7 @@ def main():
     ]].to_string(index=False))
     print(f"\nWrote comparison table to {comparison_csv_path}")
 
-    figure_path = plot_discount_curves(choices_df, comparison_df, config, figures_dir, suffix)
+    figure_path = plot_discount_curves(choices_df, comparison_df, config, figures_dir, suffix, args.mode)
     print(f"Wrote discount-curve plot to {figure_path}")
 
 

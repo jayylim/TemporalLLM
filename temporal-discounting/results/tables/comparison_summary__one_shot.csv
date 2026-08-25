@@ -1,0 +1,4 @@
+model_name,k,beta,k_ci_low,k_ci_high,n_trials_fit,low_choice_sensitivity,k_at_boundary,k_is_reliable,monotonicity_passed,money_preference_passed,overall_passed,valid_discount_rate
+qwen2.5:1.5b-instruct,10.0,0.0007408592231707,10.0,10.0,1470,True,True,False,False,False,False,False
+qwen2.5:3b-instruct,0.0033430252863477,0.0026238062441455,0.0015154146563315,0.0057469369749679,1470,True,True,False,False,True,False,False
+qwen2.5:7b-instruct,0.0079361988024061,0.0026745400546714,0.0057373428924243,0.0104290410114385,1470,True,True,False,False,True,False,False

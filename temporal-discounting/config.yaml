@@ -38,7 +38,38 @@ waiting_game:
     After your reasoning, end your response with a final line, formatted
     exactly as "FINAL ANSWER: A" or "FINAL ANSWER: B", with no other text on
     that line.
-  cot_num_predict: 300                              # reasoning needs far more tokens than the 5-token direct mode
+  cot_num_predict: 100                              # reasoning needs far more tokens than the 5-token direct mode (changed from 300 to 100)
+
+  # --- Few-shot prompting (one-shot / two-shot) ---
+  # Per Ross, Kim & Lo (2024) sec. 4 ("LLM economicus?"), direct prompting and
+  # zero-shot CoT often fail to reliably shift LLM economic behavior, but
+  # one-shot prompting was more effective at eliciting the intended behavior
+  # for their gambling-game case study (two-shot showed mixed results, as the
+  # model sometimes confounded the two examples). This is an extrapolation to
+  # the waiting game, not something the paper tested directly, hence
+  # exploratory. Examples are given as prior user/assistant turns (via
+  # ollama_client.chat) using the SAME minimal single-letter answer format as
+  # direct mode, so the few-shot variable is isolated from the CoT-reasoning
+  # variable. Delay/amount values are deliberately chosen OUTSIDE the tested
+  # 7x7 grid (delay_grid_months / amount_grid_dollars above) so the model must
+  # generalize the demonstrated reasoning rather than memorize the answer to
+  # a specific evaluated cell. Used via `--mode one_shot` / `--mode two_shot`.
+  few_shot_example_order_seed: 20260825   # seeds A/B order randomization for example turns (fixed once, reused identically every trial)
+  one_shot_examples:
+    # Demonstrates competence check #2 (money preference): prefer any positive
+    # future amount to $0 now.
+    - sooner_amount_dollars: 0
+      delay_months: 18
+      correct_choice: later
+  two_shot_examples:
+    - sooner_amount_dollars: 0
+      delay_months: 18
+      correct_choice: later     # same money-preference example as one-shot
+    # Demonstrates competence check #1 (monotonicity): a sooner amount that's
+    # almost as large as the later amount should be preferred over waiting.
+    - sooner_amount_dollars: 980
+      delay_months: 18
+      correct_choice: sooner
 
 competence_checks:
   monotonicity_tolerance: 0.0        # allowed drop in P(sooner) between adjacent amounts before counting as a violation

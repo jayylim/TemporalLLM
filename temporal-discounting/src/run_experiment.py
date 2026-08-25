@@ -1,13 +1,20 @@
 """Main experiment driver: loops models x trials, calling Ollama and logging
 every raw completion incrementally so the run is resumable after interruption.
 
-Supports two reasoning modes (--mode):
-  direct: original minimal-instruction, single-letter-response prompt.
-  cot:    chain-of-thought prompt that requires step-by-step reasoning before
-          a "FINAL ANSWER: A/B" line. Writes to separate raw files so it never
-          overwrites the direct-mode data.
+Supports four reasoning modes (--mode), per Ross, Kim & Lo (2024) sec. 4's
+prompting-intervention case study (direct / zero-shot CoT / one-shot /
+two-shot), extrapolated here from their gambling-game experiment to the
+waiting game:
+  direct:    original minimal-instruction, single-letter-response prompt.
+  cot:       chain-of-thought prompt that requires step-by-step reasoning
+             before a "FINAL ANSWER: A/B" line.
+  one_shot:  direct-style prompt preceded by 1 worked example (see
+             waiting_game.build_few_shot_messages_for_mode).
+  two_shot:  direct-style prompt preceded by 2 worked examples.
+Each mode writes to its own raw file (via config_utils.mode_suffix) so it
+never overwrites another mode's data.
 
-Usage: python src/run_experiment.py [--config path/to/config.yaml] [--mode direct|cot]
+Usage: python src/run_experiment.py [--config path/to/config.yaml] [--mode direct|cot|one_shot|two_shot]
 """
 
 import argparse
@@ -19,7 +26,19 @@ from tqdm import tqdm
 
 from config_utils import load_config, resolve_dir_path, mode_suffix
 from ollama_client import OllamaClient
-from waiting_game import build_all_trials
+from waiting_game import build_all_trials, build_few_shot_messages_for_mode
+
+REASONING_MODES = ["direct", "cot", "one_shot", "two_shot"]
+
+# (system_prompt config key, num_predict config key) per mode. one_shot/
+# two_shot reuse the direct-mode answer format so the few-shot variable is
+# isolated from the CoT-reasoning variable.
+PROMPT_CONFIG_KEYS_BY_MODE = {
+    "direct": ("system_prompt", "num_predict"),
+    "cot": ("cot_system_prompt", "cot_num_predict"),
+    "one_shot": ("system_prompt", "num_predict"),
+    "two_shot": ("system_prompt", "num_predict"),
+}
 
 
 def safe_filename_for_model(model_name):
@@ -48,7 +67,9 @@ def load_completed_trial_ids(raw_jsonl_path):
 
 
 def run_experiment_for_model(model_name, all_trials, system_prompt, temperature, num_predict,
-                              keep_alive, reasoning_mode, ollama_client, raw_jsonl_path):
+                              keep_alive, reasoning_mode, ollama_client, raw_jsonl_path,
+                              few_shot_messages=None):
+    few_shot_messages = few_shot_messages or []
     completed_trial_ids = load_completed_trial_ids(raw_jsonl_path)
     pending_trials = [t for t in all_trials if t["trial_id"] not in completed_trial_ids]
 
@@ -57,14 +78,24 @@ def run_experiment_for_model(model_name, all_trials, system_prompt, temperature,
 
     with open(raw_jsonl_path, "a") as raw_file:
         for trial in tqdm(pending_trials, desc=f"{model_name} [{reasoning_mode}]"):
-            raw_response_text = ollama_client.generate(
-                model_name=model_name,
-                system_prompt=system_prompt,
-                user_prompt=trial["user_prompt"],
-                temperature=temperature,
-                num_predict=num_predict,
-                keep_alive=keep_alive,
-            )
+            if few_shot_messages:
+                raw_response_text = ollama_client.chat(
+                    model_name=model_name,
+                    system_prompt=system_prompt,
+                    messages=few_shot_messages + [{"role": "user", "content": trial["user_prompt"]}],
+                    temperature=temperature,
+                    num_predict=num_predict,
+                    keep_alive=keep_alive,
+                )
+            else:
+                raw_response_text = ollama_client.generate(
+                    model_name=model_name,
+                    system_prompt=system_prompt,
+                    user_prompt=trial["user_prompt"],
+                    temperature=temperature,
+                    num_predict=num_predict,
+                    keep_alive=keep_alive,
+                )
 
             logged_record = dict(trial)  # copy trial fields (prompt, order, ids)
             logged_record["model_name"] = model_name
@@ -79,22 +110,24 @@ def run_experiment_for_model(model_name, all_trials, system_prompt, temperature,
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
-    arg_parser.add_argument("--mode", choices=["direct", "cot"], default="direct",
-                             help="direct: minimal single-letter prompt. cot: chain-of-thought prompt.")
+    arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct",
+                             help="direct: minimal single-letter prompt. cot: chain-of-thought prompt. "
+                                  "one_shot/two_shot: direct-style prompt preceded by worked examples.")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
     waiting_game_config = config["waiting_game"]
     ollama_config = config["ollama"]
 
-    if args.mode == "direct":
-        system_prompt = waiting_game_config["system_prompt"]
-        num_predict = waiting_game_config["num_predict"]
-    else:
-        system_prompt = waiting_game_config["cot_system_prompt"]
-        num_predict = waiting_game_config["cot_num_predict"]
+    system_prompt_key, num_predict_key = PROMPT_CONFIG_KEYS_BY_MODE[args.mode]
+    system_prompt = waiting_game_config[system_prompt_key]
+    num_predict = waiting_game_config[num_predict_key]
     temperature = waiting_game_config["temperature"]
     keep_alive = ollama_config["keep_alive"]
+
+    few_shot_messages = build_few_shot_messages_for_mode(waiting_game_config, args.mode)
+    if few_shot_messages:
+        print(f"Mode = {args.mode}: prepending {len(few_shot_messages) // 2} worked example(s) to every trial.")
 
     ollama_client = OllamaClient(
         base_url=ollama_config["base_url"],
@@ -127,6 +160,7 @@ def main():
             reasoning_mode=args.mode,
             ollama_client=ollama_client,
             raw_jsonl_path=raw_jsonl_path,
+            few_shot_messages=few_shot_messages,
         )
 
         is_last_model = model_index == len(model_names) - 1

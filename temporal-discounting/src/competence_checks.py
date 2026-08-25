@@ -19,13 +19,20 @@ import os
 import pandas as pd
 
 from config_utils import load_config, resolve_dir_path, mode_suffix
+from run_experiment import REASONING_MODES
 
 
 def compute_p_sooner_table(model_choices_df):
     """Pivot table: rows = delay_months, columns = amount_dollars, values =
     P(chose sooner option), computed only over trials that parsed (A or B).
     """
-    parsed_rows_df = model_choices_df.dropna(subset=["chose_sooner_option"])
+    parsed_rows_df = model_choices_df.dropna(subset=["chose_sooner_option"]).copy()
+    # chose_sooner_option round-trips through CSV as an object column (mix of
+    # bool/NaN) whenever any parse failures exist elsewhere in the dataframe
+    # (common for cot/one_shot/two_shot modes), which silently makes the
+    # pivoted table object-dtype too and breaks downstream numeric ops
+    # (e.g. np.interp in analyze.py). Cast explicitly so it's always float.
+    parsed_rows_df["chose_sooner_option"] = parsed_rows_df["chose_sooner_option"].astype(bool).astype(float)
     p_sooner_table = parsed_rows_df.pivot_table(
         index="delay_months",
         columns="amount_dollars",
@@ -90,7 +97,7 @@ def run_competence_checks_for_model(model_choices_df, competence_config):
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
-    arg_parser.add_argument("--mode", choices=["direct", "cot"], default="direct")
+    arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)

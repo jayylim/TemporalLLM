@@ -22,6 +22,7 @@ import pandas as pd
 from scipy.optimize import minimize
 
 from config_utils import load_config, resolve_dir_path, mode_suffix
+from run_experiment import REASONING_MODES
 
 PARAM_BOUNDS = [(1e-6, 10.0), (1e-6, 20.0)]  # (k, beta)
 INITIAL_PARAMS = [0.01, 1.0]
@@ -126,7 +127,7 @@ def fit_discounting_for_model(model_choices_df, later_amount_dollars, n_bootstra
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
-    arg_parser.add_argument("--mode", choices=["direct", "cot"], default="direct")
+    arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)

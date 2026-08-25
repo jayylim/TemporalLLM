@@ -1,0 +1,4 @@
+model_name,k,beta,k_ci_low,k_ci_high,n_trials_fit,low_choice_sensitivity,k_at_boundary,k_is_reliable
+qwen2.5:1.5b-instruct,10.0,0.0006977208940730273,10.0,10.0,1470,True,True,False
+qwen2.5:3b-instruct,10.0,0.001586902158005322,10.0,10.0,1470,True,True,False
+qwen2.5:7b-instruct,0.00845566137841091,0.0024549927020738396,0.006023077826889064,0.0111887675916547,1470,True,True,False

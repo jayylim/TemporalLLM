@@ -4,33 +4,60 @@ overview: Build and run a local pipeline that administers the Rachlin/Ross-Kim-L
 todos:
   - id: scaffold
     content: Scaffold project directory, config.yaml, requirements.txt, PREREGISTRATION.md
-    status: pending
+    status: completed
   - id: ollama_client
     content: Implement ollama_client.py wrapper (generate, keep_alive management, retries)
-    status: pending
+    status: completed
   - id: waiting_game
     content: "Implement waiting_game.py: 49-cell grid generation with order randomization and prompt templates"
-    status: pending
+    status: completed
   - id: run_experiment
     content: "Implement run_experiment.py: resumable driver looping models x cells x N=30 samples"
-    status: pending
+    status: completed
   - id: parse_responses
     content: "Implement parse_responses.py: robust A/B extraction and parse-failure logging"
-    status: pending
+    status: completed
   - id: competence_checks
     content: "Implement competence_checks.py: monotonicity and money-preference gating tests"
-    status: pending
+    status: completed
   - id: fit_discounting
     content: "Implement fit_discounting.py: hyperbolic k fitting via nonlinear regression with bootstrap CIs"
-    status: pending
+    status: completed
   - id: analyze
     content: "Implement analyze.py: comparison table and discount-curve plots vs. human benchmark"
-    status: pending
+    status: completed
   - id: pilot
     content: Run small pilot (N=3) on qwen2.5:1.5b-instruct to validate end-to-end pipeline
-    status: pending
+    status: completed
   - id: full_run
     content: Execute full N=30 run across all three models and produce final analysis
+    status: completed
+  - id: direct_mode_finding
+    content: "Finding: all 3 Qwen models FAIL competence checks under direct minimal prompting (no valid discount rate) -> motivates the extension below"
+    status: completed
+  - id: cot_mode_infra
+    content: "Add --mode cot (zero-shot chain-of-thought) support across run_experiment/parse_responses/competence_checks/fit_discounting/analyze"
+    status: completed
+  - id: few_shot_infra
+    content: "Add --mode one_shot/two_shot support (OllamaClient.chat + waiting_game few-shot example rendering), per Ross et al. 2024 sec 4's CoT/one-shot/two-shot prompting case study"
+    status: completed
+  - id: compare_modes
+    content: Implement compare_modes.py to aggregate competence/k across all 4 modes into one table+plot
+    status: completed
+  - id: preregistration_update
+    content: Update PREREGISTRATION.md with exploratory H5-H7 + deviation note for the prompting-mode extension
+    status: completed
+  - id: pipeline_smoke_test
+    content: Validate cot/one_shot/two_shot modes end-to-end on a small pilot grid (config_pilot.yaml); fixed a latent object-dtype bug in competence_checks.py exposed by CoT parse failures
+    status: completed
+  - id: cot_full_run
+    content: Execute full N=30 --mode cot run across all three models
+    status: pending
+  - id: few_shot_full_run
+    content: Execute full N=30 --mode one_shot and --mode two_shot runs across all three models
+    status: pending
+  - id: cross_mode_analysis
+    content: Run parse/competence/fit/analyze/compare_modes for cot/one_shot/two_shot and interpret whether prompting format changes competence pass rate or fitted k
     status: pending
 isProject: false
 ---
@@ -122,3 +149,54 @@ flowchart TD
 ## Notes / deferred items
 - Contamination check (nonce-currency "zorbs" control) and the other two paradigms (Kirby MCQ-27, CoT Conjoint) are intentionally deferred to a Phase 1b pass once this pipeline is validated, per the narrowed scope.
 - No mechanistic/activation access is needed for this phase since Ollama only exposes text generation; Phase 3 (steering) will require switching the `qwen2.5:*` weights to a HF/transformers or MLX backend with residual-stream access.
+
+## Extension: does prompting format change whether hyperbolic discounting is elicited?
+
+**Result of the direct-mode full run:** all three Qwen2.5 models (1.5b/3b/7b) failed the
+preregistered competence gate (`results/tables/competence_checks.csv`), so no model has a valid
+fitted discount rate under minimal direct prompting. This is consistent with, but not identical to,
+[Ross, Kim & Lo (2024)](https://arxiv.org/abs/2408.02784) Table 1 / Appendix D.1, where several of
+their *smaller* models (GPT-3.5 Turbo, Claude 2.1, LLaMa 2 13B/70B, Mistral 7B) also failed the
+waiting-game competence test and were excluded from the k comparison — only GPT-4, GPT-4 Turbo, and
+Gemini 1.0 Pro passed.
+
+Separately, in §4 of the same paper, the authors ran a prompting-intervention case study on GPT-4's
+**risk/loss aversion** (their gambling game, not the waiting game): direct prompting and zero-shot
+CoT often failed to reliably shift behavior toward the intended target, one-shot prompting was more
+effective, and two-shot prompting showed mixed results (example confounding).
+
+**Relevance to this project:** it's an open (and previously untested-by-that-paper) question whether
+the same prompting-format sensitivity applies to *competence* at the waiting game itself for smaller
+local models — i.e., maybe Qwen2.5 *can* apply the time value of money consistently, but the terse
+single-letter format under-elicits it, and CoT reasoning and/or worked examples (few-shot) help. This
+extension tests that directly, treating it as exploratory/hypothesis-generating (see
+`PREREGISTRATION.md` "Exploratory extension" section for the full H5-H7 writeup and the important
+caveat that Ross et al. tested CoT/few-shot on a *different* game, not time discounting).
+
+### What was built (this pass)
+- `--mode cot`: zero-shot chain-of-thought prompt requiring step-by-step reasoning + a
+  `FINAL ANSWER: A/B` tag (already scaffolded across the pipeline; not yet run at full N=30).
+- `--mode one_shot` / `--mode two_shot`: prepends 1 or 2 worked examples as prior chat turns
+  (`OllamaClient.chat` via Ollama's `/api/chat`), using the same minimal answer format as direct mode.
+  Example delay/amount values are chosen outside the tested 7x7 grid so the model must generalize
+  rather than memorize a specific test cell's answer.
+- `src/compare_modes.py`: aggregates `comparison_summary{mode}.csv` across all 4 modes into one table
+  (`results/tables/comparison_summary_by_mode.csv`) and a side-by-side competence/`k` plot
+  (`results/figures/mode_comparison.png`).
+- Fixed a latent bug in `competence_checks.compute_p_sooner_table`: the parsed `chose_sooner_option`
+  column round-trips through CSV as `object` dtype whenever any parse failures exist elsewhere in the
+  dataframe (common for CoT/few-shot, rare for direct), which silently broke `analyze.py`'s
+  indifference-amount interpolation (`np.interp` dtype-cast error). Now explicitly cast to float.
+- Validated all 4 modes end-to-end on a throwaway small-grid pilot (`config_pilot.yaml`, 2 delays x
+  3 amounts x N=3, `qwen2.5:1.5b-instruct` only); pilot outputs deleted after validation since the
+  tiny grid isn't scientifically meaningful on its own.
+
+### Remaining steps to actually test H5-H7
+1. Run `python src/run_experiment.py --mode cot` (already scaffolded, not yet executed at full N=30 --
+   CoT's ~300-token completions will take substantially longer than direct mode's ~5-token ones,
+   run in background/checkpointed).
+2. Run `python src/run_experiment.py --mode one_shot` and `--mode two_shot`.
+3. For each new mode: `parse_responses.py` -> `competence_checks.py` -> `fit_discounting.py` ->
+   `analyze.py`, then `python src/compare_modes.py` to build the cross-mode table/plot.
+4. Interpret: does `overall_passed`/`valid_discount_rate` change by mode for any model? Does fitted
+   `k` move toward the human benchmark? Report per H5-H7, explicitly flagged as exploratory.

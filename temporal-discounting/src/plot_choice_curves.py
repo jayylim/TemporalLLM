@@ -17,7 +17,7 @@ import pandas as pd
 
 from config_utils import load_config, resolve_dir_path, mode_suffix
 from competence_checks import compute_p_sooner_table
-from run_experiment import safe_filename_for_model
+from run_experiment import REASONING_MODES, safe_filename_for_model
 
 JITTER_HEIGHT = 0.06          # vertical spread of the individual-trial dots around y=0 or y=1
 SAMPLE_DOT_ALPHA = 0.45
@@ -95,7 +95,7 @@ def plot_model_choice_curves(model_name, model_choices_df, delay_grid_months, am
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
-    arg_parser.add_argument("--mode", choices=["direct", "cot"], default="direct")
+    arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
