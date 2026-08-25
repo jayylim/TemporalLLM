@@ -1,0 +1,79 @@
+# Small pilot config: N=2 samples/item on qwen2.5:1.5b-instruct only, to
+# validate the end-to-end pipeline (generate -> parse -> competence ->
+# fit -> analyze) before committing to the full N=30 x 3-model run.
+# Writes to separate data/results directories so it never touches the real
+# results collected under config.yaml.
+
+ollama:
+  base_url: "http://localhost:11434"
+  keep_alive: "5m"
+  request_timeout_s: 120
+  max_retries: 3
+  retry_backoff_s: 2
+
+models:
+  - qwen2.5:1.5b-instruct
+
+kirby:
+  items_file: "kirby27_items.yaml"
+  variant: "verbatim"
+  n_samples_per_item: 2
+  temperature: 1.0
+  num_predict: 5
+  system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. When answering, respond with only the letter of the option
+    you choose (A or B). Do not explain your choice.
+  random_seed: 20260825
+
+  cot_system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. Think step by step: compare the two amounts and how long you
+    would have to wait for each, and reason about which is the better deal.
+    After your reasoning, end your response with a final line, formatted
+    exactly as "FINAL ANSWER: A" or "FINAL ANSWER: B", with no other text on
+    that line.
+  cot_num_predict: 100
+
+  few_shot_example_order_seed: 20260825
+  one_shot_examples:
+    - sir_amount_dollars: 10
+      ldr_amount_dollars: 1000000
+      delay_days: 10
+      correct_choice: later
+  two_shot_examples:
+    - sir_amount_dollars: 10
+      ldr_amount_dollars: 1000000
+      delay_days: 10
+      correct_choice: later
+    - sir_amount_dollars: 95
+      ldr_amount_dollars: 100
+      delay_days: 300
+      correct_choice: sooner
+
+competence_checks:
+  min_consistency_score: 0.75
+  rank_monotonicity_tolerance: 0.0
+  max_rank_monotonicity_violations: 2
+
+fitting:
+  n_bootstrap: 200
+  bootstrap_seed: 42
+  k_lower_bound: 0.000001
+  k_upper_bound: 1.0
+  beta_lower_bound: 0.000001
+  beta_upper_bound: 20.0
+  low_sensitivity_beta_threshold: 0.05
+
+human_benchmark:
+  kirby_median_k_per_day: 0.016
+
+visualization:
+  n_sample_trials_to_plot_per_item: 2
+  trial_selection_seed: 123
+
+paths:
+  data_raw_dir: "data/raw_pilot"
+  data_processed_dir: "data/processed_pilot"
+  results_tables_dir: "results/tables_pilot"
+  results_figures_dir: "results/figures_pilot"

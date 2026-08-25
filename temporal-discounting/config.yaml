@@ -12,6 +12,7 @@ models:
   - qwen2.5:1.5b-instruct
   - qwen2.5:3b-instruct
   - qwen2.5:7b-instruct
+  - qwen3:4b-instruct-2507-q4_K_M
 
 waiting_game:
   later_amount_dollars: 1000                       # fixed "later" payoff, matches Rachlin 1991 design

@@ -113,6 +113,9 @@ def main():
     arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct",
                              help="direct: minimal single-letter prompt. cot: chain-of-thought prompt. "
                                   "one_shot/two_shot: direct-style prompt preceded by worked examples.")
+    arg_parser.add_argument("--model", default=None,
+                             help="Run only this model (must appear in config.yaml models list). "
+                                  "Useful when other models' results are already collected.")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
@@ -145,6 +148,14 @@ def main():
     raw_dir = resolve_dir_path(config["paths"]["data_raw_dir"])
 
     model_names = config["models"]
+    if args.model is not None:
+        if args.model not in model_names:
+            raise SystemExit(
+                f"--model {args.model!r} is not in config models list: {model_names}"
+            )
+        model_names = [args.model]
+        print(f"Restricting run to single model: {args.model}")
+
     for model_index, model_name in enumerate(model_names):
         raw_jsonl_path = os.path.join(
             raw_dir, f"{safe_filename_for_model(model_name)}{mode_suffix(args.mode)}.jsonl"

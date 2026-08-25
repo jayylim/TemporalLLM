@@ -1,0 +1,49 @@
+# Kirby Monetary Choice Questionnaire (MCQ-27) verified item table.
+#
+# Sourced and cross-validated from two independent citations of the original
+# Kirby, Petry & Bickel (1999) Table 1 <https://doi.org/10.1037/0096-3445.128.1.78>:
+#   - item text/amounts/delays: the standard MCQ instrument PDF
+#     <http://fmwww.bc.edu/repec/bocode/m/mcq_instrument.pdf>
+#   - k-value/magnitude assignments: Kaplan et al. (2016), "Automating Scoring
+#     of Delay Discounting for the 21- and 27-Item Monetary Choice
+#     Questionnaires" <https://doi.org/10.1007/s40614-016-0070-9>, Table 1.
+#
+# All 27 rows cross-checked between both sources (item#, SIR/LDR/delay match
+# exactly; magnitude bands align: Small LDR $25-35, Medium LDR $50-60, Large
+# LDR $75-85; k formula k = (ldr - sir) / (sir * delay_days) reproduces the
+# cited k to 4+ significant figures for every row).
+#
+# item_id: original 1-27 numbering from the Kirby et al. (1999) instrument.
+# sir_amount_dollars / ldr_amount_dollars: smaller-immediate / larger-delayed reward.
+# delay_days: delay until the LDR is paid.
+# k_at_indifference: the discount rate at which SIR == LDR / (1 + k*delay) (per-day units).
+# magnitude: small / medium / large LDR magnitude band (used for the
+#   small_k/medium_k/large_k scoring and the magnitude-effect check).
+items:
+  - {item_id: 1,  sir_amount_dollars: 54, ldr_amount_dollars: 55, delay_days: 117, k_at_indifference: 0.000158278, magnitude: medium}
+  - {item_id: 2,  sir_amount_dollars: 55, ldr_amount_dollars: 75, delay_days: 61,  k_at_indifference: 0.005961252, magnitude: large}
+  - {item_id: 3,  sir_amount_dollars: 19, ldr_amount_dollars: 25, delay_days: 53,  k_at_indifference: 0.005958292, magnitude: small}
+  - {item_id: 4,  sir_amount_dollars: 31, ldr_amount_dollars: 85, delay_days: 7,   k_at_indifference: 0.248847926, magnitude: large}
+  - {item_id: 5,  sir_amount_dollars: 14, ldr_amount_dollars: 25, delay_days: 19,  k_at_indifference: 0.041353383, magnitude: small}
+  - {item_id: 6,  sir_amount_dollars: 47, ldr_amount_dollars: 50, delay_days: 160, k_at_indifference: 0.000398936, magnitude: medium}
+  - {item_id: 7,  sir_amount_dollars: 15, ldr_amount_dollars: 35, delay_days: 13,  k_at_indifference: 0.102564103, magnitude: small}
+  - {item_id: 8,  sir_amount_dollars: 25, ldr_amount_dollars: 60, delay_days: 14,  k_at_indifference: 0.100000000, magnitude: medium}
+  - {item_id: 9,  sir_amount_dollars: 78, ldr_amount_dollars: 80, delay_days: 162, k_at_indifference: 0.000158278, magnitude: large}
+  - {item_id: 10, sir_amount_dollars: 40, ldr_amount_dollars: 55, delay_days: 62,  k_at_indifference: 0.006048387, magnitude: medium}
+  - {item_id: 11, sir_amount_dollars: 11, ldr_amount_dollars: 30, delay_days: 7,   k_at_indifference: 0.246753247, magnitude: small}
+  - {item_id: 12, sir_amount_dollars: 67, ldr_amount_dollars: 75, delay_days: 119, k_at_indifference: 0.001003386, magnitude: large}
+  - {item_id: 13, sir_amount_dollars: 34, ldr_amount_dollars: 35, delay_days: 186, k_at_indifference: 0.000158128, magnitude: small}
+  - {item_id: 14, sir_amount_dollars: 27, ldr_amount_dollars: 50, delay_days: 21,  k_at_indifference: 0.040564374, magnitude: medium}
+  - {item_id: 15, sir_amount_dollars: 69, ldr_amount_dollars: 85, delay_days: 91,  k_at_indifference: 0.002548176, magnitude: large}
+  - {item_id: 16, sir_amount_dollars: 49, ldr_amount_dollars: 60, delay_days: 89,  k_at_indifference: 0.002522357, magnitude: medium}
+  - {item_id: 17, sir_amount_dollars: 80, ldr_amount_dollars: 85, delay_days: 157, k_at_indifference: 0.000398089, magnitude: large}
+  - {item_id: 18, sir_amount_dollars: 24, ldr_amount_dollars: 35, delay_days: 29,  k_at_indifference: 0.015804598, magnitude: small}
+  - {item_id: 19, sir_amount_dollars: 33, ldr_amount_dollars: 80, delay_days: 14,  k_at_indifference: 0.101731602, magnitude: large}
+  - {item_id: 20, sir_amount_dollars: 28, ldr_amount_dollars: 30, delay_days: 179, k_at_indifference: 0.000399042, magnitude: small}
+  - {item_id: 21, sir_amount_dollars: 34, ldr_amount_dollars: 50, delay_days: 30,  k_at_indifference: 0.015686275, magnitude: medium}
+  - {item_id: 22, sir_amount_dollars: 25, ldr_amount_dollars: 30, delay_days: 80,  k_at_indifference: 0.002500000, magnitude: small}
+  - {item_id: 23, sir_amount_dollars: 41, ldr_amount_dollars: 75, delay_days: 20,  k_at_indifference: 0.041463415, magnitude: large}
+  - {item_id: 24, sir_amount_dollars: 54, ldr_amount_dollars: 60, delay_days: 111, k_at_indifference: 0.001001001, magnitude: medium}
+  - {item_id: 25, sir_amount_dollars: 54, ldr_amount_dollars: 80, delay_days: 30,  k_at_indifference: 0.016049383, magnitude: large}
+  - {item_id: 26, sir_amount_dollars: 22, ldr_amount_dollars: 25, delay_days: 136, k_at_indifference: 0.001002674, magnitude: small}
+  - {item_id: 27, sir_amount_dollars: 20, ldr_amount_dollars: 55, delay_days: 7,   k_at_indifference: 0.250000000, magnitude: medium}

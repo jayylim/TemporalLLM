@@ -2,3 +2,4 @@ model_name,monotonicity_passed,money_preference_passed,overall_passed
 qwen2.5:1.5b-instruct,False,False,False
 qwen2.5:3b-instruct,False,True,False
 qwen2.5:7b-instruct,False,True,False
+qwen3:4b-instruct-2507-q4_K_M,False,True,False

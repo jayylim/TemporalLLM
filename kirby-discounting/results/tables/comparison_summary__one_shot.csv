@@ -1,0 +1,5 @@
+model_name,overall_k,overall_consistency,n_items_scored,small_k,medium_k,large_k,geomean_k,magnitude_effect_holds,logistic_k,logistic_beta,logistic_k_ci_low,logistic_k_ci_high,n_trials_fit,low_choice_sensitivity,k_at_boundary,logistic_k_is_reliable,rank_monotonicity_passed,n_rank_monotonicity_violations,consistency_passed,overall_passed,valid_discount_rate
+qwen2.5:1.5b-instruct,0.1590849629628534,0.6666666666666666,27,0.063773197132841,0.1261845545381684,0.1591090763167125,0.1085874866485072,False,0.24342365276243,0.002854973797632,1e-06,1.0,810,True,False,False,False,9,False,False,False
+qwen2.5:3b-instruct,0.000158128,1.0,27,0.000158128,0.000158278,0.000158278,0.0001582279841966,False,1e-06,0.1455594606771385,1e-06,1e-06,810,False,True,False,False,7,True,False,False
+qwen2.5:7b-instruct,0.000158128,0.8518518518518519,27,0.000158128,0.000158278,0.000158278,0.0001582279841966,False,1e-06,0.0387891962424318,1e-06,1e-06,810,True,True,False,False,11,True,False,False
+qwen3:4b-instruct-2507-q4_K_M,0.25,1.0,27,0.246753247,0.25,0.248847926,0.2485300860162918,False,1.0,2.3808933227586633,1.0,1.0,810,False,True,False,True,0,True,True,False

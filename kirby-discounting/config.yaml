@@ -1,0 +1,101 @@
+# Central config for the Kirby MCQ-27 intertemporal-choice pipeline.
+# Sibling project to ../temporal-discounting (Waiting Game): same models,
+# same overall architecture, different instrument (fixed human-normed items
+# instead of a synthetic delay x amount grid).
+# All scripts read from this file so items/models/N stay consistent everywhere.
+
+ollama:
+  base_url: "http://localhost:11434"
+  keep_alive: "5m"        # how long Ollama keeps a model resident after last request
+  request_timeout_s: 120   # CoT completions take longer than the 5-token direct-answer mode
+  max_retries: 3
+  retry_backoff_s: 2       # exponential backoff base: sleep = retry_backoff_s * (2 ** attempt)
+
+models:
+  - qwen2.5:1.5b-instruct
+  - qwen2.5:3b-instruct
+  - qwen2.5:7b-instruct
+  - qwen3:4b-instruct-2507-q4_K_M
+
+kirby:
+  items_file: "kirby27_items.yaml"
+  variant: "verbatim"       # "verbatim" (exact instrument wording) | "paraphrased" (contamination-control reword; see kirby_game.py)
+  n_samples_per_item: 30    # completions per item per model (LLM responses are stochastic, unlike the single-shot human instrument)
+  temperature: 1.0
+  num_predict: 5            # short completion budget (only need "A"/"B")
+  system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. When answering, respond with only the letter of the option
+    you choose (A or B). Do not explain your choice.
+  random_seed: 20260825     # seeds order randomization for reproducibility
+
+  # --- Chain-of-thought (CoT) reasoning mode ---
+  cot_system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. Think step by step: compare the two amounts and how long you
+    would have to wait for each, and reason about which is the better deal.
+    After your reasoning, end your response with a final line, formatted
+    exactly as "FINAL ANSWER: A" or "FINAL ANSWER: B", with no other text on
+    that line.
+  cot_num_predict: 100
+
+  # --- Few-shot prompting (one-shot / two-shot) ---
+  # Examples are deliberately far outside the 27 items' amount/delay ranges
+  # (SIR $11-$80, LDR $25-$85, delay 7-186 days) so the model must generalize
+  # the demonstrated response *format* rather than memorize an answer to an
+  # evaluated item. Mirrors the balanced one-shot/two-shot design used in the
+  # sibling Waiting Game project (see ../temporal-discounting/config.yaml),
+  # itself adapted from Ross, Kim & Lo (2024) sec. 4.
+  few_shot_example_order_seed: 20260825
+  one_shot_examples:
+    # Trivially decidable by magnitude: an enormous gain for waiting a short delay.
+    - sir_amount_dollars: 10
+      ldr_amount_dollars: 1000000
+      delay_days: 10
+      correct_choice: later
+  two_shot_examples:
+    - sir_amount_dollars: 10
+      ldr_amount_dollars: 1000000
+      delay_days: 10
+      correct_choice: later     # same "enormous gain" example as one-shot
+    # Trivially decidable the other direction: a tiny gain for a long wait.
+    - sir_amount_dollars: 95
+      ldr_amount_dollars: 100
+      delay_days: 300
+      correct_choice: sooner
+
+competence_checks:
+  min_consistency_score: 0.75         # Kaplan et al. (2016) convention: overall consistency below this -> low-quality/unreliable flag
+  rank_monotonicity_tolerance: 0.0    # allowed increase in P(choose LDR) as item k increases before counting as a violation
+  max_rank_monotonicity_violations: 2 # violations tolerated (out of 26 adjacent pairs) before failing the rank-order check
+
+fitting:
+  n_bootstrap: 1000
+  bootstrap_seed: 42
+  # Bounds for the probabilistic-logistic (MLE) method's free k parameter.
+  # Kirby's own item k-values span ~0.00016-0.25 (per day); bounds are set
+  # generously wider than that range so a fit landing at either bound is a
+  # clear signal of degenerate/unidentifiable behavior, analogous to the
+  # Waiting Game's PARAM_BOUNDS in ../temporal-discounting/src/fit_discounting.py.
+  k_lower_bound: 0.000001
+  k_upper_bound: 1.0
+  beta_lower_bound: 0.000001
+  beta_upper_bound: 20.0
+  low_sensitivity_beta_threshold: 0.05
+
+human_benchmark:
+  # Kirby, Petry & Bickel (1999) non-drug-using control group and the widely
+  # cited Kirby (2009) percentile norms place the general-population median
+  # geometric-mean k in roughly this range for the 27-item MCQ. Approximate,
+  # for reference overlay only (see PREREGISTRATION.md for caveats).
+  kirby_median_k_per_day: 0.016
+
+visualization:
+  n_sample_trials_to_plot_per_item: 10   # how many raw individual trials to overlay as jittered dots per item
+  trial_selection_seed: 123
+
+paths:
+  data_raw_dir: "data/raw"
+  data_processed_dir: "data/processed"
+  results_tables_dir: "results/tables"
+  results_figures_dir: "results/figures"

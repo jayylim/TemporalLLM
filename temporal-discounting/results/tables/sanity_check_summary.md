@@ -10,6 +10,8 @@ Modes included: one-shot, two-shot. Human benchmark (Rachlin et al. 1991): k = 0
 | qwen2.5:3b-instruct | two-shot | ❌ | ✅ | ❌ | 0.0016 | ❌ | **❌** | 10.0000 [10.0000, 10.0000] |
 | qwen2.5:7b-instruct | one-shot | ❌ | ✅ | ❌ | 0.0027 | ❌ | **❌** | 0.0079 [0.0057, 0.0104] |
 | qwen2.5:7b-instruct | two-shot | ❌ | ✅ | ❌ | 0.0025 | ❌ | **❌** | 0.0085 [0.0060, 0.0112] |
+| qwen3:4b-instruct-2507-q4_K_M | one-shot | ❌ | ✅ | ❌ | 12.3448 | ✅ | **❌** | 5.7463 [4.6730, 6.4355] |
+| qwen3:4b-instruct-2507-q4_K_M | two-shot | ❌ | ❌ | ❌ | 0.0010 | ❌ | **❌** | 0.0736 [0.0502, 10.0000] |
 
 ## Column definitions
 
