@@ -3,6 +3,11 @@ every reasoning mode that has been run (direct / cot / one_shot / two_shot),
 to test whether prompting interventions change competence-check pass rates
 or hyperbolic-fit reliability for each model.
 
+Also writes a clean factor-summary folder (`results/summary/`) with:
+  - by_condition.csv  — one row per model × trial_type × persona
+  - by_factor.csv     — rollups of pass rates / mean k by each factor
+  - README.md         — column definitions
+
 Motivation (see PREREGISTRATION.md "Exploratory extension"): Ross, Kim & Lo
 (2024) sec. 4 found that, for GPT-4's risk/loss aversion in their gambling
 game, direct prompting and zero-shot CoT often failed to reliably elicit the
@@ -24,7 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from config_utils import load_config, resolve_dir_path, mode_suffix
+from config_utils import load_config, resolve_dir_path, result_suffix
 from run_experiment import REASONING_MODES
 
 MODE_DISPLAY_LABELS = {
@@ -40,6 +45,28 @@ MODE_COLORS = {
     "two_shot": "#d62728",
 }
 MODE_SORT_ORDER = {mode: index for index, mode in enumerate(REASONING_MODES)}
+PERSONA_CONDITIONS = [False, True]
+
+# Clean column order for the factor-summary condition table.
+CONDITION_SUMMARY_COLUMNS = [
+    "model_name",
+    "model_family",
+    "trial_type",
+    "persona",
+    "monotonicity_passed",
+    "money_preference_passed",
+    "competence_passed",
+    "k_reliable",
+    "valid_discount_rate",
+    "k",
+    "k_ci_low",
+    "k_ci_high",
+    "beta",
+    "k_at_boundary",
+    "k_lower_bound",
+    "k_upper_bound",
+    "n_trials_fit",
+]
 
 
 def checkmark(is_true):
@@ -52,25 +79,215 @@ def format_k_with_ci(row):
     return f"{row['k']:.4f} [{row['k_ci_low']:.4f}, {row['k_ci_high']:.4f}]"
 
 
-def build_sanity_check_markdown(combined_df, human_k):
+def model_family_from_name(model_name):
+    """Coarse family label for factor rollups (qwen2.5 / qwen3 / llama3.1 / mistral)."""
+    name = str(model_name).lower()
+    if name.startswith("qwen2.5"):
+        return "qwen2.5"
+    if name.startswith("qwen3"):
+        return "qwen3"
+    if name.startswith("llama3.1") or name.startswith("llama3"):
+        return "llama3.1"
+    if name.startswith("mistral"):
+        return "mistral"
+    return name.split(":")[0]
+
+
+def build_condition_summary(combined_df):
+    """One clean row per model × trial_type (reasoning mode) × persona."""
+    summary_df = combined_df.copy()
+    summary_df["trial_type"] = summary_df["reasoning_mode"].map(
+        lambda mode: MODE_DISPLAY_LABELS.get(mode, mode)
+    )
+    summary_df["persona"] = summary_df["persona_enabled"].map(
+        lambda enabled: "on" if bool(enabled) else "off"
+    )
+    summary_df["model_family"] = summary_df["model_name"].map(model_family_from_name)
+    summary_df["competence_passed"] = summary_df["overall_passed"]
+    summary_df["k_reliable"] = summary_df["k_is_reliable"]
+
+    for optional_col in ["k_lower_bound", "k_upper_bound", "k_at_boundary", "n_trials_fit"]:
+        if optional_col not in summary_df.columns:
+            summary_df[optional_col] = np.nan
+
+    summary_df["_mode_order"] = summary_df["reasoning_mode"].map(MODE_SORT_ORDER)
+    summary_df = summary_df.sort_values(
+        ["model_name", "_mode_order", "persona"]
+    ).reset_index(drop=True)
+
+    present_cols = [c for c in CONDITION_SUMMARY_COLUMNS if c in summary_df.columns]
+    return summary_df[present_cols]
+
+
+def _factor_rollup(group_df, factor_name, factor_value):
+    n = len(group_df)
+    competence = group_df["competence_passed"].astype(bool)
+    valid = group_df["valid_discount_rate"].astype(bool)
+    valid_k = group_df.loc[valid, "k"]
+    return {
+        "factor": factor_name,
+        "level": factor_value,
+        "n_conditions": n,
+        "n_competence_passed": int(competence.sum()),
+        "pct_competence_passed": float(competence.mean()) if n else np.nan,
+        "n_valid_discount_rate": int(valid.sum()),
+        "pct_valid_discount_rate": float(valid.mean()) if n else np.nan,
+        "mean_k_when_valid": float(valid_k.mean()) if len(valid_k) else np.nan,
+        "median_k_when_valid": float(valid_k.median()) if len(valid_k) else np.nan,
+        "mean_beta": float(group_df["beta"].mean()) if n else np.nan,
+    }
+
+
+def build_factor_rollups(condition_df):
+    """Summaries across model / model_family / trial_type / persona (and pairs)."""
+    rows = []
+
+    single_factors = [
+        ("model_name", "model"),
+        ("model_family", "model_family"),
+        ("trial_type", "trial_type"),
+        ("persona", "persona"),
+    ]
+    for col, factor_name in single_factors:
+        if col not in condition_df.columns:
+            continue
+        for level, group_df in condition_df.groupby(col, dropna=False):
+            rows.append(_factor_rollup(group_df, factor_name, str(level)))
+
+    # Useful pairwise views for the main experimental axes.
+    pair_specs = [
+        (("trial_type", "persona"), "trial_type_x_persona"),
+        (("model_family", "trial_type"), "model_family_x_trial_type"),
+        (("model_family", "persona"), "model_family_x_persona"),
+        (("model_name", "persona"), "model_x_persona"),
+        (("model_name", "trial_type"), "model_x_trial_type"),
+    ]
+    for cols, factor_name in pair_specs:
+        if any(c not in condition_df.columns for c in cols):
+            continue
+        for level_values, group_df in condition_df.groupby(list(cols), dropna=False):
+            if not isinstance(level_values, tuple):
+                level_values = (level_values,)
+            level = " | ".join(str(v) for v in level_values)
+            rows.append(_factor_rollup(group_df, factor_name, level))
+
+    rollup_df = pd.DataFrame(rows)
+    if rollup_df.empty:
+        return rollup_df
+    return rollup_df.sort_values(["factor", "level"]).reset_index(drop=True)
+
+
+def load_demographic_strata(tables_dir, modes):
+    """Loads any comparison_summary_by_demographics* tables written by analyze.py."""
+    strata_frames = []
+    for reasoning_mode in modes:
+        for persona_enabled in PERSONA_CONDITIONS:
+            if not persona_enabled:
+                continue  # demographics only exist for persona-on runs
+            suffix = result_suffix(reasoning_mode, persona_enabled)
+            csv_path = os.path.join(tables_dir, f"comparison_summary_by_demographics{suffix}.csv")
+            if not os.path.exists(csv_path):
+                continue
+            strata_df = pd.read_csv(csv_path)
+            strata_df["trial_type"] = MODE_DISPLAY_LABELS.get(reasoning_mode, reasoning_mode)
+            strata_df["persona"] = "on"
+            strata_frames.append(strata_df)
+            print(f"[demographics / {reasoning_mode}] loaded {csv_path}")
+    if not strata_frames:
+        return pd.DataFrame()
+    return pd.concat(strata_frames, ignore_index=True)
+
+
+def write_summary_readme(summary_dir, human_k, k_lower_bound, k_upper_bound):
+    readme = f"""# Waiting Game — factor summary
+
+Clean tables for scanning results across **model**, **trial type** (prompting
+mode: direct / chain-of-thought / one-shot / two-shot), and **persona** (on/off).
+
+Human benchmark (Rachlin et al. 1991): k = {human_k} per month.
+Reasonable k bounds (hits cut from reliability, still reported): [{k_lower_bound}, {k_upper_bound}].
+
+## Files
+
+| File | Contents |
+|---|---|
+| `by_condition.csv` | One row per **model × trial_type × persona** with competence gates, fit reliability, and fitted k. **Start here.** |
+| `by_factor.csv` | Rollups: pass rates and mean/median k (when valid) by each factor alone and useful pairs (e.g. trial_type × persona). |
+| `by_demographics.csv` | Present only when persona-on runs exist: gender / age-band strata from `analyze.py`. |
+| `sanity_check_summary.md` | Human-readable checklist table (same content as `results/tables/sanity_check_summary.md`). |
+
+## `by_condition.csv` columns
+
+- **model_name** / **model_family**: full Ollama tag and coarse family (qwen2.5, qwen3, llama3.1, mistral).
+- **trial_type**: prompting condition (`direct`, `chain-of-thought`, `one-shot`, `two-shot`).
+- **persona**: `on` or `off` demographic persona framing.
+- **competence_passed**: monotonicity AND money-preference both pass.
+- **k_reliable**: choice sensitivity adequate AND fitted k not at bound.
+- **valid_discount_rate**: competence_passed AND k_reliable — trust the fitted k only when this is true.
+- **k**, **k_ci_low**, **k_ci_high**, **beta**: hyperbolic fit (shown even when invalid; check flags first).
+
+Regenerate with: `python src/compare_modes.py`
+"""
+    readme_path = os.path.join(summary_dir, "README.md")
+    with open(readme_path, "w") as readme_file:
+        readme_file.write(readme)
+    return readme_path
+
+
+def write_factor_summary_folder(combined_df, tables_dir, summary_dir, human_k,
+                                k_lower_bound, k_upper_bound, sanity_check_markdown):
+    """Writes the clean results/summary/ factor tables."""
+    condition_df = build_condition_summary(combined_df)
+    rollup_df = build_factor_rollups(condition_df)
+    demographics_df = load_demographic_strata(tables_dir, REASONING_MODES)
+
+    condition_path = os.path.join(summary_dir, "by_condition.csv")
+    rollup_path = os.path.join(summary_dir, "by_factor.csv")
+    condition_df.to_csv(condition_path, index=False)
+    rollup_df.to_csv(rollup_path, index=False)
+
+    written = [condition_path, rollup_path]
+
+    if not demographics_df.empty:
+        demographics_path = os.path.join(summary_dir, "by_demographics.csv")
+        demographics_df.to_csv(demographics_path, index=False)
+        written.append(demographics_path)
+
+    sanity_path = os.path.join(summary_dir, "sanity_check_summary.md")
+    with open(sanity_path, "w") as sanity_file:
+        sanity_file.write(sanity_check_markdown)
+    written.append(sanity_path)
+
+    readme_path = write_summary_readme(summary_dir, human_k, k_lower_bound, k_upper_bound)
+    written.append(readme_path)
+    return written, condition_df, rollup_df
+
+
+def build_sanity_check_markdown(combined_df, human_k, k_lower_bound, k_upper_bound):
     """One presentable Markdown table with every sanity check (competence
     gate + fit-reliability gate) side by side, across every model x mode
-    that has been run, sorted model-major / mode-minor for easy scanning.
+    x persona that has been run, sorted model-major / mode-minor.
     """
     sortable_df = combined_df.copy()
     sortable_df["_mode_order"] = sortable_df["reasoning_mode"].map(MODE_SORT_ORDER)
-    sortable_df = sortable_df.sort_values(["model_name", "_mode_order"])
+    sortable_df["_persona_order"] = sortable_df.get("persona_enabled", False)
+    sort_cols = ["model_name", "_mode_order"]
+    if "persona_enabled" in sortable_df.columns:
+        sort_cols.append("_persona_order")
+    sortable_df = sortable_df.sort_values(sort_cols)
 
     header = (
-        "| Model | Mode | Monotonicity | Money Pref. | Competence Pass | "
+        "| Model | Mode | Persona | Monotonicity | Money Pref. | Competence Pass | "
         "Beta (choice sens.) | k Reliable? | **Valid Discount Rate** | Fitted k [95% CI] |"
     )
-    separator = "|---|---|---|---|---|---|---|---|---|"
+    separator = "|---|---|---|---|---|---|---|---|---|---|"
     rows = [header, separator]
     for _, row in sortable_df.iterrows():
         mode_label = MODE_DISPLAY_LABELS.get(row["reasoning_mode"], row["reasoning_mode"])
+        persona_label = "on" if bool(row.get("persona_enabled", False)) else "off"
         rows.append(
-            f"| {row['model_name']} | {mode_label} | {checkmark(row['monotonicity_passed'])} | "
+            f"| {row['model_name']} | {mode_label} | {persona_label} | "
+            f"{checkmark(row['monotonicity_passed'])} | "
             f"{checkmark(row['money_preference_passed'])} | {checkmark(row['overall_passed'])} | "
             f"{row['beta']:.4f} | {checkmark(row['k_is_reliable'])} | "
             f"**{checkmark(row['valid_discount_rate'])}** | {format_k_with_ci(row)} |"
@@ -81,6 +298,7 @@ def build_sanity_check_markdown(combined_df, human_k):
     legend = f"""# Waiting Game: Sanity Check Summary
 
 Modes included: {modes_present}. Human benchmark (Rachlin et al. 1991): k = {human_k} per month.
+Reasonable k bounds (hits cut from reliability, still reported): [{k_lower_bound}, {k_upper_bound}].
 
 {table_markdown}
 
@@ -89,30 +307,33 @@ Modes included: {modes_present}. Human benchmark (Rachlin et al. 1991): k = {hum
 - **Monotonicity**: P(choose sooner) does not decrease as the sooner amount increases, for every delay (`competence_checks.py::check_monotonicity`).
 - **Money Pref.**: model doesn't prefer $0 now over positive delayed money, at any delay (`check_money_preference`).
 - **Competence Pass**: Monotonicity AND Money Pref. both pass (`overall_passed`).
-- **Beta (choice sens.)**: fitted logistic sensitivity of choices to the amount/delay tradeoff; values below 0.05 mean choices barely track option value at all, so any fitted k is statistically unidentifiable (`fit_discounting.py::LOW_SENSITIVITY_BETA_THRESHOLD`).
-- **k Reliable?**: beta >= 0.05 AND fitted k did not land at the optimizer's boundary (1e-6 or 10.0).
+- **Beta (choice sens.)**: fitted logistic sensitivity of choices to the amount/delay tradeoff; values below 0.05 mean choices barely track option value at all, so any fitted k is statistically unidentifiable (`fit_discounting.py`).
+- **k Reliable?**: beta >= threshold AND fitted k did not land at the optimizer's boundary ([{k_lower_bound}, {k_upper_bound}]). Bound hits are cut from reliability; the bound values themselves are still reported.
 - **Valid Discount Rate**: Competence Pass AND k Reliable \u2014 the single bottom-line flag for whether the fitted k should be trusted at all.
 - **Fitted k [95% CI]**: hyperbolic discount rate per month with bootstrap 95% CI, shown regardless of reliability (compare against the "k Reliable?"/"Valid Discount Rate" columns before interpreting).
+- **Persona**: on/off demographic persona framing; demographic strata (gender, age band) are in `by_demographics.csv` / `comparison_summary_by_demographics*.csv` when persona-on data exists.
 """
     return legend
 
 
 def load_available_mode_tables(tables_dir, modes):
-    """Loads comparison_summary{mode}.csv for every mode that has already
-    been run through analyze.py. Modes with no output yet are skipped (not
-    an error), since this script is meant to be re-run incrementally as more
-    modes finish.
+    """Loads comparison_summary{mode}{persona}.csv for every mode x persona
+    condition that has already been run through analyze.py.
     """
     mode_tables = {}
     for reasoning_mode in modes:
-        csv_path = os.path.join(tables_dir, f"comparison_summary{mode_suffix(reasoning_mode)}.csv")
-        if not os.path.exists(csv_path):
-            print(f"[{reasoning_mode}] no comparison_summary found at {csv_path}, skipping "
-                  f"(run analyze.py --mode {reasoning_mode} first).")
-            continue
-        mode_df = pd.read_csv(csv_path)
-        mode_df["reasoning_mode"] = reasoning_mode
-        mode_tables[reasoning_mode] = mode_df
+        for persona_enabled in PERSONA_CONDITIONS:
+            suffix = result_suffix(reasoning_mode, persona_enabled)
+            csv_path = os.path.join(tables_dir, f"comparison_summary{suffix}.csv")
+            key = (reasoning_mode, persona_enabled)
+            if not os.path.exists(csv_path):
+                continue
+            mode_df = pd.read_csv(csv_path)
+            mode_df["reasoning_mode"] = reasoning_mode
+            if "persona_enabled" not in mode_df.columns:
+                mode_df["persona_enabled"] = persona_enabled
+            mode_tables[key] = mode_df
+            print(f"[{reasoning_mode} / persona={persona_enabled}] loaded {csv_path}")
     return mode_tables
 
 
@@ -125,7 +346,10 @@ def plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_d
     figure, (axis_competence, axis_k) = plt.subplots(1, 2, figsize=(14, 5.5))
 
     for mode_index, reasoning_mode in enumerate(modes_present):
-        mode_df = combined_df[combined_df["reasoning_mode"] == reasoning_mode].set_index("model_name")
+        mode_df = combined_df[
+            (combined_df["reasoning_mode"] == reasoning_mode)
+            & (~combined_df["persona_enabled"].astype(bool))
+        ].set_index("model_name")
         x_positions = np.arange(n_models) + (mode_index - (n_modes - 1) / 2) * bar_width
         color = MODE_COLORS.get(reasoning_mode, None)
         label = MODE_DISPLAY_LABELS.get(reasoning_mode, reasoning_mode)
@@ -146,14 +370,14 @@ def plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_d
     axis_competence.set_xticklabels(model_names, rotation=20, ha="right")
     axis_competence.set_ylim(-0.1, 1.1)
     axis_competence.set_ylabel("Valid discount rate (competence-checks pass AND k reliable)")
-    axis_competence.set_title("Does prompting yield a valid hyperbolic fit?")
+    axis_competence.set_title("Does prompting yield a valid hyperbolic fit? (persona-off)")
     axis_competence.legend(fontsize=8)
 
     axis_k.axhline(human_k, color="black", linestyle="--", linewidth=1, label=f"human benchmark k={human_k}")
     axis_k.set_xticks(np.arange(n_models))
     axis_k.set_xticklabels(model_names, rotation=20, ha="right")
     axis_k.set_ylabel("Fitted k per month (only shown where valid_discount_rate=True)")
-    axis_k.set_title("Fitted hyperbolic discount rate by mode")
+    axis_k.set_title("Fitted hyperbolic discount rate by mode (persona-off)")
     axis_k.legend(fontsize=8)
 
     figure.suptitle("Effect of reasoning mode (direct / CoT / one-shot / two-shot) on Waiting Game results")
@@ -173,7 +397,12 @@ def main():
     config = load_config(args.config)
     tables_dir = resolve_dir_path(config["paths"]["results_tables_dir"])
     figures_dir = resolve_dir_path(config["paths"]["results_figures_dir"])
+    summary_dir = resolve_dir_path(
+        config["paths"].get("results_summary_dir", "results/summary")
+    )
     human_k = config["human_benchmark"]["rachlin_1991_k_per_month"]
+    k_lower = config["fitting"].get("k_lower_bound", 1e-6)
+    k_upper = config["fitting"].get("k_upper_bound", 10.0)
 
     mode_tables = load_available_mode_tables(tables_dir, REASONING_MODES)
     if not mode_tables:
@@ -183,24 +412,43 @@ def main():
         return
 
     combined_df = pd.concat(mode_tables.values(), ignore_index=True)
+    if "persona_enabled" not in combined_df.columns:
+        combined_df["persona_enabled"] = False
     combined_csv_path = os.path.join(tables_dir, "comparison_summary_by_mode.csv")
     combined_df.to_csv(combined_csv_path, index=False)
 
-    print(f"\n=== Cross-mode comparison ({', '.join(mode_tables.keys())}) ===")
+    print(f"\n=== Cross-mode comparison ===")
     print(combined_df[[
-        "model_name", "reasoning_mode", "monotonicity_passed", "money_preference_passed",
+        "model_name", "reasoning_mode", "persona_enabled", "monotonicity_passed", "money_preference_passed",
         "k_is_reliable", "valid_discount_rate", "k",
-    ]].sort_values(["model_name", "reasoning_mode"]).to_string(index=False))
+    ]].sort_values(["model_name", "reasoning_mode", "persona_enabled"]).to_string(index=False))
     print(f"\nWrote combined table to {combined_csv_path}")
 
-    figure_path = plot_competence_and_k_by_mode(combined_df, list(mode_tables.keys()), human_k, figures_dir)
+    modes_present = sorted(
+        {mode for mode, _ in mode_tables.keys()},
+        key=lambda m: MODE_SORT_ORDER.get(m, 99),
+    )
+    figure_path = plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_dir)
     print(f"Wrote mode-comparison plot to {figure_path}")
 
-    sanity_check_markdown = build_sanity_check_markdown(combined_df, human_k)
+    sanity_check_markdown = build_sanity_check_markdown(combined_df, human_k, k_lower, k_upper)
     sanity_check_path = os.path.join(tables_dir, "sanity_check_summary.md")
     with open(sanity_check_path, "w") as markdown_file:
         markdown_file.write(sanity_check_markdown)
     print(f"Wrote presentable sanity-check summary table to {sanity_check_path}")
+
+    written_paths, condition_df, rollup_df = write_factor_summary_folder(
+        combined_df, tables_dir, summary_dir, human_k, k_lower, k_upper, sanity_check_markdown
+    )
+    print(f"\n=== Factor summary folder ({summary_dir}) ===")
+    print(condition_df[[
+        "model_name", "trial_type", "persona", "competence_passed",
+        "k_reliable", "valid_discount_rate", "k",
+    ]].to_string(index=False))
+    print(f"\nFactor rollups ({len(rollup_df)} rows):")
+    print(rollup_df.head(20).to_string(index=False))
+    for path in written_paths:
+        print(f"Wrote {path}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,9 @@
+model_name,model_family,trial_type,persona,monotonicity_passed,money_preference_passed,competence_passed,k_reliable,valid_discount_rate,k,k_ci_low,k_ci_high,beta,k_at_boundary,k_lower_bound,k_upper_bound,n_trials_fit
+qwen2.5:1.5b-instruct,qwen2.5,one-shot,off,False,False,False,False,False,10.0,10.0,10.0,0.0007408592231707,True,,,1470
+qwen2.5:1.5b-instruct,qwen2.5,two-shot,off,False,False,False,False,False,10.0,10.0,10.0,0.000697720894073,True,,,1470
+qwen2.5:3b-instruct,qwen2.5,one-shot,off,False,True,False,False,False,0.0033430252863477,0.0015154146563315,0.0057469369749679,0.0026238062441455,True,,,1470
+qwen2.5:3b-instruct,qwen2.5,two-shot,off,False,True,False,False,False,10.0,10.0,10.0,0.0015869021580053,True,,,1470
+qwen2.5:7b-instruct,qwen2.5,one-shot,off,False,True,False,False,False,0.0079361988024061,0.0057373428924243,0.0104290410114385,0.0026745400546714,True,,,1470
+qwen2.5:7b-instruct,qwen2.5,two-shot,off,False,True,False,False,False,0.0084556613784109,0.006023077826889,0.0111887675916547,0.0024549927020738,True,,,1470
+qwen3:4b-instruct-2507-q4_K_M,qwen3,one-shot,off,False,True,False,True,False,5.746283227841607,4.673028801927818,6.435503035982225,12.344769298531707,False,,,1470
+qwen3:4b-instruct-2507-q4_K_M,qwen3,two-shot,off,False,False,False,False,False,0.0736290009706236,0.0501999794499762,9.99999630254412,0.0009542599215608,False,,,1470

@@ -15,8 +15,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from config_utils import load_config, resolve_dir_path, mode_suffix
-from competence_checks import compute_p_sooner_table
+from config_utils import (
+    load_config,
+    resolve_dir_path,
+    result_suffix,
+    persona_enabled_from_config,
+)
+from competence_checks import compute_p_sooner_table, fit_grid_choices
 from run_experiment import REASONING_MODES, safe_filename_for_model
 
 JITTER_HEIGHT = 0.06          # vertical spread of the individual-trial dots around y=0 or y=1
@@ -43,7 +48,10 @@ def select_sample_trials(model_choices_df, delay_months, amount_dollars, n_trial
 
 def plot_model_choice_curves(model_name, model_choices_df, delay_grid_months, amount_grid_dollars,
                               n_trials_to_plot, trial_selection_seed, reasoning_mode="direct"):
-    p_sooner_table = compute_p_sooner_table(model_choices_df)
+    # Plot the fit-grid amounts only; $0 competence probes are omitted so the
+    # x-axis matches amount_grid_dollars even when probe cells are present.
+    fit_choices_df = fit_grid_choices(model_choices_df)
+    p_sooner_table = compute_p_sooner_table(fit_choices_df)
     trial_selection_rng = np.random.default_rng(trial_selection_seed)
 
     n_delays = len(delay_grid_months)
@@ -56,20 +64,25 @@ def plot_model_choice_curves(model_name, model_choices_df, delay_grid_months, am
 
         # Aggregate empirical curve: P(choose sooner) vs amount, over all N samples.
         if delay_months in p_sooner_table.index:
-            p_sooner_row = p_sooner_table.loc[delay_months, amount_grid_dollars]
-            axis.plot(amount_grid_dollars, p_sooner_row.values, "-o", color=CURVE_COLOR,
-                       label="P(choose sooner), all samples", zorder=3)
+            available_amounts = [a for a in amount_grid_dollars if a in p_sooner_table.columns]
+            if available_amounts:
+                p_sooner_row = p_sooner_table.loc[delay_months, available_amounts]
+                axis.plot(available_amounts, p_sooner_row.values.astype(float), "-o", color=CURVE_COLOR,
+                           label="P(choose sooner), all samples", zorder=3)
 
         # A few raw individual trials per cell, jittered so 0/1 outcomes are visible as a cloud.
         for amount_dollars in amount_grid_dollars:
             sample_trials_df = select_sample_trials(
-                model_choices_df, delay_months, amount_dollars, n_trials_to_plot, trial_selection_rng
+                fit_choices_df, delay_months, amount_dollars, n_trials_to_plot, trial_selection_rng
             )
             if sample_trials_df.empty:
                 continue
             chose_sooner_values = sample_trials_df["chose_sooner_option"].astype(float).values
             y_jitter = trial_selection_rng.uniform(-JITTER_HEIGHT, JITTER_HEIGHT, size=len(chose_sooner_values))
-            x_jitter = trial_selection_rng.uniform(-3, 3, size=len(chose_sooner_values))
+            # Scale x-jitter to amount span so it stays visible across grids.
+            amount_span = max(amount_grid_dollars) - min(amount_grid_dollars)
+            x_jitter_scale = max(amount_span * 0.01, 1.0)
+            x_jitter = trial_selection_rng.uniform(-x_jitter_scale, x_jitter_scale, size=len(chose_sooner_values))
             axis.scatter(
                 amount_dollars + x_jitter, chose_sooner_values + y_jitter,
                 color=SAMPLE_DOT_COLOR, alpha=SAMPLE_DOT_ALPHA, s=14, zorder=2,
@@ -92,16 +105,28 @@ def plot_model_choice_curves(model_name, model_choices_df, delay_grid_months, am
     return figure
 
 
+def resolve_persona_enabled(args, config):
+    if getattr(args, "persona", False):
+        return True
+    if getattr(args, "no_persona", False):
+        return False
+    return persona_enabled_from_config(config)
+
+
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
     arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
+    persona_group = arg_parser.add_mutually_exclusive_group()
+    persona_group.add_argument("--persona", action="store_true")
+    persona_group.add_argument("--no-persona", action="store_true")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
+    persona_enabled = resolve_persona_enabled(args, config)
     processed_dir = resolve_dir_path(config["paths"]["data_processed_dir"])
     figures_dir = resolve_dir_path(config["paths"]["results_figures_dir"])
-    suffix = mode_suffix(args.mode)
+    suffix = result_suffix(args.mode, persona_enabled)
 
     choices_df = pd.read_csv(os.path.join(processed_dir, f"choices{suffix}.csv"))
     delay_grid_months = config["waiting_game"]["delay_grid_months"]

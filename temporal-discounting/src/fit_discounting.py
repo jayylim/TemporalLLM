@@ -11,7 +11,11 @@ Free parameters: k (discount rate, per month) and beta (choice sensitivity /
 inverse noise). Fit by minimizing the trial-level Bernoulli negative
 log-likelihood.
 
+Fits landing at the configured k bounds are flagged unreliable (cut from
+valid_discount_rate) but the bound values themselves are still reported.
+
 Usage: python src/fit_discounting.py [--config path/to/config.yaml]
+       [--mode ...] [--persona|--no-persona]
 """
 
 import argparse
@@ -21,19 +25,51 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from config_utils import load_config, resolve_dir_path, mode_suffix
+from config_utils import (
+    load_config,
+    resolve_dir_path,
+    result_suffix,
+    persona_enabled_from_config,
+)
 from run_experiment import REASONING_MODES
 
-PARAM_BOUNDS = [(1e-6, 10.0), (1e-6, 20.0)]  # (k, beta)
-INITIAL_PARAMS = [0.01, 1.0]
-LOW_SENSITIVITY_BETA_THRESHOLD = 0.05  # beta below this means choices barely track option value -> k is unidentifiable
 BOUNDARY_RELATIVE_TOLERANCE = 1e-3
+INITIAL_PARAMS = [0.01, 1.0]
+
+
+def fitting_bounds_from_config(fitting_config):
+    """Reads (k, beta) optimizer bounds + reliability threshold from config,
+    with the historical hard-coded defaults as fallbacks.
+    """
+    k_lower = float(fitting_config.get("k_lower_bound", 1e-6))
+    k_upper = float(fitting_config.get("k_upper_bound", 10.0))
+    beta_lower = float(fitting_config.get("beta_lower_bound", 1e-6))
+    beta_upper = float(fitting_config.get("beta_upper_bound", 20.0))
+    low_beta_threshold = float(fitting_config.get("low_sensitivity_beta_threshold", 0.05))
+    return {
+        "param_bounds": [(k_lower, k_upper), (beta_lower, beta_upper)],
+        "k_lower_bound": k_lower,
+        "k_upper_bound": k_upper,
+        "beta_lower_bound": beta_lower,
+        "beta_upper_bound": beta_upper,
+        "low_sensitivity_beta_threshold": low_beta_threshold,
+    }
 
 
 def is_near_bound(value, lower_bound, upper_bound):
-    bound_span = upper_bound - lower_bound
-    near_lower = (value - lower_bound) <= BOUNDARY_RELATIVE_TOLERANCE * bound_span
-    near_upper = (upper_bound - value) <= BOUNDARY_RELATIVE_TOLERANCE * bound_span
+    """True if `value` is at/near either optimizer bound (degenerate fit).
+
+    Uses a per-bound relative tolerance so a lower bound of 1e-6 does not
+    incorrectly flag every small-but-valid k (e.g. human-scale ~0.01) as a
+    boundary hit — which the old span-relative rule did, because 0.1% of a
+    [1e-6, 10] span is 0.01 absolute.
+    """
+    if np.isnan(value):
+        return True
+    lower_tol = max(BOUNDARY_RELATIVE_TOLERANCE * abs(lower_bound), 1e-12)
+    upper_tol = max(BOUNDARY_RELATIVE_TOLERANCE * abs(upper_bound), 1e-12)
+    near_lower = abs(value - lower_bound) <= lower_tol
+    near_upper = abs(value - upper_bound) <= upper_tol
     return near_lower or near_upper
 
 
@@ -63,14 +99,14 @@ def negative_log_likelihood(params, model_choices_df, later_amount_dollars):
     return -np.sum(log_likelihood)
 
 
-def fit_k_and_beta(model_choices_df, later_amount_dollars):
+def fit_k_and_beta(model_choices_df, later_amount_dollars, param_bounds):
     """One MLE fit on the given trials. Returns (k, beta) or (nan, nan) if it fails."""
     fit_result = minimize(
         negative_log_likelihood,
         x0=INITIAL_PARAMS,
         args=(model_choices_df, later_amount_dollars),
         method="L-BFGS-B",
-        bounds=PARAM_BOUNDS,
+        bounds=param_bounds,
     )
     if not fit_result.success:
         return np.nan, np.nan
@@ -78,7 +114,8 @@ def fit_k_and_beta(model_choices_df, later_amount_dollars):
     return fitted_k, fitted_beta
 
 
-def bootstrap_k_confidence_interval(model_choices_df, later_amount_dollars, n_bootstrap, bootstrap_seed):
+def bootstrap_k_confidence_interval(model_choices_df, later_amount_dollars, n_bootstrap,
+                                     bootstrap_seed, param_bounds):
     """Row-level (trial-level) bootstrap over the parsed trials, refitting k each time."""
     bootstrap_rng = np.random.default_rng(bootstrap_seed)
     n_trials = len(model_choices_df)
@@ -87,7 +124,7 @@ def bootstrap_k_confidence_interval(model_choices_df, later_amount_dollars, n_bo
     for _ in range(n_bootstrap):
         resample_indices = bootstrap_rng.integers(0, n_trials, size=n_trials)
         resampled_df = model_choices_df.iloc[resample_indices]
-        bootstrap_k, _ = fit_k_and_beta(resampled_df, later_amount_dollars)
+        bootstrap_k, _ = fit_k_and_beta(resampled_df, later_amount_dollars, param_bounds)
         if not np.isnan(bootstrap_k):
             bootstrap_k_values.append(bootstrap_k)
 
@@ -97,20 +134,36 @@ def bootstrap_k_confidence_interval(model_choices_df, later_amount_dollars, n_bo
     return ci_low, ci_high
 
 
-def fit_discounting_for_model(model_choices_df, later_amount_dollars, n_bootstrap, bootstrap_seed):
+def trials_for_fitting(model_choices_df):
+    """Drops competence-probe cells ($0) and parse failures before fitting."""
     parsed_trials_df = model_choices_df.dropna(subset=["chose_sooner_option"]).copy()
+    if "is_competence_probe" in parsed_trials_df.columns:
+        probe_mask = parsed_trials_df["is_competence_probe"].fillna(False).astype(bool)
+        parsed_trials_df = parsed_trials_df[~probe_mask]
     parsed_trials_df["chose_sooner_option"] = parsed_trials_df["chose_sooner_option"].astype(bool)
+    return parsed_trials_df
 
-    fitted_k, fitted_beta = fit_k_and_beta(parsed_trials_df, later_amount_dollars)
+
+def fit_discounting_for_model(model_choices_df, later_amount_dollars, n_bootstrap,
+                               bootstrap_seed, fitting_bounds):
+    parsed_trials_df = trials_for_fitting(model_choices_df)
+    param_bounds = fitting_bounds["param_bounds"]
+    k_lower = fitting_bounds["k_lower_bound"]
+    k_upper = fitting_bounds["k_upper_bound"]
+    low_beta_threshold = fitting_bounds["low_sensitivity_beta_threshold"]
+
+    fitted_k, fitted_beta = fit_k_and_beta(parsed_trials_df, later_amount_dollars, param_bounds)
     ci_low, ci_high = bootstrap_k_confidence_interval(
-        parsed_trials_df, later_amount_dollars, n_bootstrap, bootstrap_seed
+        parsed_trials_df, later_amount_dollars, n_bootstrap, bootstrap_seed, param_bounds
     )
 
     # Low beta means P(sooner) barely responds to option value -> the likelihood
     # surface over k is nearly flat, so a fitted k (esp. one sitting at a bound)
     # should not be read as a meaningful discount rate.
-    low_choice_sensitivity = fitted_beta < LOW_SENSITIVITY_BETA_THRESHOLD
-    k_at_boundary = is_near_bound(fitted_k, *PARAM_BOUNDS[0])
+    low_choice_sensitivity = (
+        np.isnan(fitted_beta) or fitted_beta < low_beta_threshold
+    )
+    k_at_boundary = is_near_bound(fitted_k, k_lower, k_upper)
 
     return {
         "k": fitted_k,
@@ -120,25 +173,43 @@ def fit_discounting_for_model(model_choices_df, later_amount_dollars, n_bootstra
         "n_trials_fit": len(parsed_trials_df),
         "low_choice_sensitivity": low_choice_sensitivity,
         "k_at_boundary": k_at_boundary,
+        "k_lower_bound": k_lower,
+        "k_upper_bound": k_upper,
+        # Cut upper/lower-bound hits from reliability; bounds themselves still reported.
         "k_is_reliable": (not low_choice_sensitivity) and (not k_at_boundary),
     }
+
+
+def resolve_persona_enabled(args, config):
+    if getattr(args, "persona", False):
+        return True
+    if getattr(args, "no_persona", False):
+        return False
+    return persona_enabled_from_config(config)
 
 
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
     arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
+    persona_group = arg_parser.add_mutually_exclusive_group()
+    persona_group.add_argument("--persona", action="store_true")
+    persona_group.add_argument("--no-persona", action="store_true")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
+    persona_enabled = resolve_persona_enabled(args, config)
+    suffix = result_suffix(args.mode, persona_enabled)
+
     processed_dir = resolve_dir_path(config["paths"]["data_processed_dir"])
     tables_dir = resolve_dir_path(config["paths"]["results_tables_dir"])
 
-    choices_csv_path = os.path.join(processed_dir, f"choices{mode_suffix(args.mode)}.csv")
+    choices_csv_path = os.path.join(processed_dir, f"choices{suffix}.csv")
     choices_df = pd.read_csv(choices_csv_path)
     later_amount_dollars = config["waiting_game"]["later_amount_dollars"]
     n_bootstrap = config["fitting"]["n_bootstrap"]
     bootstrap_seed = config["fitting"]["bootstrap_seed"]
+    fitting_bounds = fitting_bounds_from_config(config["fitting"])
 
     fit_rows = []
     for model_name in config["models"]:
@@ -148,17 +219,19 @@ def main():
             continue
 
         fit_result = fit_discounting_for_model(
-            model_choices_df, later_amount_dollars, n_bootstrap, bootstrap_seed
+            model_choices_df, later_amount_dollars, n_bootstrap, bootstrap_seed, fitting_bounds
         )
         reliability_note = "" if fit_result["k_is_reliable"] else "  [UNRELIABLE: low choice sensitivity or k at bound]"
         print(f"[{model_name}] k={fit_result['k']:.5f} "
               f"95% CI=[{fit_result['k_ci_low']:.5f}, {fit_result['k_ci_high']:.5f}] "
-              f"beta={fit_result['beta']:.3f} (n={fit_result['n_trials_fit']}){reliability_note}")
+              f"beta={fit_result['beta']:.3f} (n={fit_result['n_trials_fit']}) "
+              f"bounds=[{fit_result['k_lower_bound']}, {fit_result['k_upper_bound']}]"
+              f"{reliability_note}")
 
-        fit_rows.append(dict(model_name=model_name, **fit_result))
+        fit_rows.append(dict(model_name=model_name, persona_enabled=persona_enabled, **fit_result))
 
     fit_df = pd.DataFrame(fit_rows)
-    fit_csv_path = os.path.join(tables_dir, f"discount_rates{mode_suffix(args.mode)}.csv")
+    fit_csv_path = os.path.join(tables_dir, f"discount_rates{suffix}.csv")
     fit_df.to_csv(fit_csv_path, index=False)
     print(f"Wrote fitted discount rates to {fit_csv_path}")
 

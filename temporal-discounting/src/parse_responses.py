@@ -15,7 +15,12 @@ import re
 
 import pandas as pd
 
-from config_utils import load_config, resolve_dir_path, mode_suffix
+from config_utils import (
+    load_config,
+    resolve_dir_path,
+    result_suffix,
+    persona_enabled_from_config,
+)
 from run_experiment import REASONING_MODES, safe_filename_for_model
 
 # Tried in priority order. For CoT text, the reasoning body often mentions
@@ -102,6 +107,11 @@ def parse_raw_jsonl_file(raw_jsonl_path):
                 "amount_dollars": trial_record["amount_dollars"],
                 "sample_index": trial_record["sample_index"],
                 "sooner_is_option_a": trial_record["sooner_is_option_a"],
+                "is_competence_probe": trial_record.get("is_competence_probe", False),
+                "persona_enabled": trial_record.get("persona_enabled", False),
+                "persona_surname": trial_record.get("persona_surname"),
+                "persona_age": trial_record.get("persona_age"),
+                "persona_gender": trial_record.get("persona_gender"),
                 "raw_response_text": raw_response_text,
                 "raw_response_length_chars": len(raw_response_text or ""),
                 "final_answer_tag_found": has_final_answer_tag(raw_response_text),
@@ -119,28 +129,44 @@ def compute_parse_failure_rate(parsed_rows):
     return n_failures / n_total
 
 
+def resolve_persona_enabled(args, config):
+    if getattr(args, "persona", False):
+        return True
+    if getattr(args, "no_persona", False):
+        return False
+    return persona_enabled_from_config(config)
+
+
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
     arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
+    persona_group = arg_parser.add_mutually_exclusive_group()
+    persona_group.add_argument("--persona", action="store_true")
+    persona_group.add_argument("--no-persona", action="store_true")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
+    persona_enabled = resolve_persona_enabled(args, config)
+    suffix = result_suffix(args.mode, persona_enabled)
+
     raw_dir = resolve_dir_path(config["paths"]["data_raw_dir"])
     processed_dir = resolve_dir_path(config["paths"]["data_processed_dir"])
 
     all_parsed_rows = []
     for model_name in config["models"]:
         raw_jsonl_path = os.path.join(
-            raw_dir, f"{safe_filename_for_model(model_name)}{mode_suffix(args.mode)}.jsonl"
+            raw_dir, f"{safe_filename_for_model(model_name)}{suffix}.jsonl"
         )
         if not os.path.exists(raw_jsonl_path):
-            print(f"[{model_name} / {args.mode}] no raw data file found at {raw_jsonl_path}, skipping.")
+            print(f"[{model_name} / {args.mode} / persona={persona_enabled}] "
+                  f"no raw data file found at {raw_jsonl_path}, skipping.")
             continue
 
         model_parsed_rows = parse_raw_jsonl_file(raw_jsonl_path)
         parse_failure_rate = compute_parse_failure_rate(model_parsed_rows)
-        message = (f"[{model_name} / {args.mode}] parsed {len(model_parsed_rows)} trials, "
+        message = (f"[{model_name} / {args.mode} / persona={persona_enabled}] "
+                    f"parsed {len(model_parsed_rows)} trials, "
                     f"parse-failure rate = {parse_failure_rate:.1%}")
         if args.mode == "cot":  # only CoT prompts require the FINAL ANSWER tag
             n_with_tag = sum(1 for row in model_parsed_rows if row["final_answer_tag_found"])
@@ -150,7 +176,7 @@ def main():
         all_parsed_rows.extend(model_parsed_rows)
 
     choices_dataframe = pd.DataFrame(all_parsed_rows)
-    processed_csv_path = os.path.join(processed_dir, f"choices{mode_suffix(args.mode)}.csv")
+    processed_csv_path = os.path.join(processed_dir, f"choices{suffix}.csv")
     choices_dataframe.to_csv(processed_csv_path, index=False)
     print(f"Wrote {len(choices_dataframe)} parsed trials to {processed_csv_path}")
 

@@ -26,3 +26,18 @@ def mode_suffix(reasoning_mode):
     compatible), "__cot" for chain-of-thought mode.
     """
     return "" if reasoning_mode == "direct" else f"__{reasoning_mode}"
+
+
+def persona_suffix(persona_enabled):
+    """Filename suffix for persona-on runs so they never overwrite no-persona data."""
+    return "__persona" if persona_enabled else ""
+
+
+def result_suffix(reasoning_mode, persona_enabled=False):
+    """Combined mode + persona suffix used for raw/processed/results filenames."""
+    return f"{mode_suffix(reasoning_mode)}{persona_suffix(persona_enabled)}"
+
+
+def persona_enabled_from_config(config):
+    persona_config = config.get("persona") or {}
+    return bool(persona_config.get("enabled", False))
