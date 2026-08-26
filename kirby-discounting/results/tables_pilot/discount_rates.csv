@@ -1,2 +1,0 @@
-model_name,overall_k,overall_consistency,n_items_scored,small_k,medium_k,large_k,geomean_k,magnitude_effect_holds,logistic_k,logistic_beta,logistic_k_ci_low,logistic_k_ci_high,n_trials_fit,low_choice_sensitivity,k_at_boundary,logistic_k_is_reliable
-qwen2.5:1.5b-instruct,0.25,0.8148148148148148,27,0.246753247,0.25,0.248847926,0.24853008601629184,False,0.021238934415376345,0.0022806175019284883,1e-06,1.0,54,True,False,False

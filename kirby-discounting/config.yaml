@@ -16,6 +16,7 @@ models:
   - qwen2.5:3b-instruct
   - qwen2.5:7b-instruct
   - qwen3:4b-instruct-2507-q4_K_M
+  - qwen3:8b
 
 kirby:
   items_file: "kirby27_items.yaml"
@@ -46,22 +47,23 @@ kirby:
   # evaluated item. Mirrors the balanced one-shot/two-shot design used in the
   # sibling Waiting Game project (see ../temporal-discounting/config.yaml),
   # itself adapted from Ross, Kim & Lo (2024) sec. 4.
+  # JL: changed the delay to 10 days and the LDR to $1000 to test for one shot effectiveness
   few_shot_example_order_seed: 20260825
   one_shot_examples:
     # Trivially decidable by magnitude: an enormous gain for waiting a short delay.
     - sir_amount_dollars: 10
-      ldr_amount_dollars: 1000000
+      ldr_amount_dollars: 1000
       delay_days: 10
       correct_choice: later
   two_shot_examples:
     - sir_amount_dollars: 10
-      ldr_amount_dollars: 1000000
+      ldr_amount_dollars: 1000
       delay_days: 10
       correct_choice: later     # same "enormous gain" example as one-shot
     # Trivially decidable the other direction: a tiny gain for a long wait.
     - sir_amount_dollars: 95
       ldr_amount_dollars: 100
-      delay_days: 300
+      delay_days: 30
       correct_choice: sooner
 
 competence_checks:

@@ -1,2 +1,0 @@
-model_name,rank_monotonicity_passed,n_rank_monotonicity_violations,consistency_passed,overall_passed
-qwen2.5:1.5b-instruct,False,7,True,False

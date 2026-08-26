@@ -1,5 +1,6 @@
 model_name,rank_monotonicity_passed,n_rank_monotonicity_violations,consistency_passed,overall_passed
-qwen2.5:1.5b-instruct,False,11,True,False
+qwen2.5:1.5b-instruct,False,12,False,False
 qwen2.5:3b-instruct,False,6,True,False
-qwen2.5:7b-instruct,False,10,True,False
-qwen3:4b-instruct-2507-q4_K_M,False,9,True,False
+qwen2.5:7b-instruct,False,9,True,False
+qwen3:4b-instruct-2507-q4_K_M,False,9,False,False
+qwen3:8b,False,11,True,False

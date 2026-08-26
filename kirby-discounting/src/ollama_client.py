@@ -29,6 +29,8 @@ class OllamaClient:
             "prompt": user_prompt,
             "stream": False,
             "keep_alive": keep_alive,
+            # Top-level (not options): disables thinking for qwen3:8b etc.
+            "think": False,
             "options": {
                 "temperature": temperature,
                 "num_predict": num_predict,
@@ -68,6 +70,8 @@ class OllamaClient:
             "messages": full_messages,
             "stream": False,
             "keep_alive": keep_alive,
+            # Top-level (not options): disables thinking for qwen3:8b etc.
+            "think": False,
             "options": {
                 "temperature": temperature,
                 "num_predict": num_predict,
