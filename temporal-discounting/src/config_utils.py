@@ -41,3 +41,22 @@ def result_suffix(reasoning_mode, persona_enabled=False):
 def persona_enabled_from_config(config):
     persona_config = config.get("persona") or {}
     return bool(persona_config.get("enabled", False))
+
+
+# A/B option-order strata for competence / fit / reporting.
+# "pooled" = all trials; "sooner_A" / "sooner_B" split on sooner_is_option_a.
+OPTION_ORDER_STRATA = [
+    ("pooled", None),
+    ("sooner_A", True),
+    ("sooner_B", False),
+]
+
+
+def filter_by_option_order(choices_df, sooner_is_option_a):
+    """Filters trials to one A/B-order stratum. None -> no filter (pooled)."""
+    if sooner_is_option_a is None:
+        return choices_df
+    if "sooner_is_option_a" not in choices_df.columns:
+        return choices_df.iloc[0:0]  # empty if order not logged
+    mask = choices_df["sooner_is_option_a"].astype(bool) == bool(sooner_is_option_a)
+    return choices_df.loc[mask]

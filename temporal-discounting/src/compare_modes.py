@@ -53,20 +53,25 @@ CONDITION_SUMMARY_COLUMNS = [
     "model_family",
     "trial_type",
     "persona",
+    "option_order",
     "monotonicity_passed",
     "money_preference_passed",
+    "indifference_nonincreasing_passed",
     "competence_passed",
     "k_reliable",
     "valid_discount_rate",
     "k",
     "k_ci_low",
     "k_ci_high",
-    "beta",
+    "r_squared",
+    "n_indifference_points",
     "k_at_boundary",
     "k_lower_bound",
     "k_upper_bound",
     "n_trials_fit",
 ]
+
+OPTION_ORDER_SORT = {"pooled": 0, "sooner_A": 1, "sooner_B": 2}
 
 
 def checkmark(is_true):
@@ -94,7 +99,7 @@ def model_family_from_name(model_name):
 
 
 def build_condition_summary(combined_df):
-    """One clean row per model × trial_type (reasoning mode) × persona."""
+    """One clean row per model × trial_type × persona × option_order."""
     summary_df = combined_df.copy()
     summary_df["trial_type"] = summary_df["reasoning_mode"].map(
         lambda mode: MODE_DISPLAY_LABELS.get(mode, mode)
@@ -102,17 +107,25 @@ def build_condition_summary(combined_df):
     summary_df["persona"] = summary_df["persona_enabled"].map(
         lambda enabled: "on" if bool(enabled) else "off"
     )
+    if "option_order" not in summary_df.columns:
+        summary_df["option_order"] = "pooled"
     summary_df["model_family"] = summary_df["model_name"].map(model_family_from_name)
     summary_df["competence_passed"] = summary_df["overall_passed"]
     summary_df["k_reliable"] = summary_df["k_is_reliable"]
 
-    for optional_col in ["k_lower_bound", "k_upper_bound", "k_at_boundary", "n_trials_fit"]:
+    for optional_col in [
+        "k_lower_bound", "k_upper_bound", "k_at_boundary", "n_trials_fit",
+        "r_squared", "n_indifference_points", "indifference_nonincreasing_passed",
+    ]:
         if optional_col not in summary_df.columns:
             summary_df[optional_col] = np.nan
 
     summary_df["_mode_order"] = summary_df["reasoning_mode"].map(MODE_SORT_ORDER)
+    summary_df["_order_order"] = summary_df["option_order"].map(
+        lambda o: OPTION_ORDER_SORT.get(o, 99)
+    )
     summary_df = summary_df.sort_values(
-        ["model_name", "_mode_order", "persona"]
+        ["model_name", "_mode_order", "persona", "_order_order"]
     ).reset_index(drop=True)
 
     present_cols = [c for c in CONDITION_SUMMARY_COLUMNS if c in summary_df.columns]
@@ -124,6 +137,7 @@ def _factor_rollup(group_df, factor_name, factor_value):
     competence = group_df["competence_passed"].astype(bool)
     valid = group_df["valid_discount_rate"].astype(bool)
     valid_k = group_df.loc[valid, "k"]
+    r2_series = group_df["r_squared"] if "r_squared" in group_df.columns else pd.Series(dtype=float)
     return {
         "factor": factor_name,
         "level": factor_value,
@@ -134,12 +148,12 @@ def _factor_rollup(group_df, factor_name, factor_value):
         "pct_valid_discount_rate": float(valid.mean()) if n else np.nan,
         "mean_k_when_valid": float(valid_k.mean()) if len(valid_k) else np.nan,
         "median_k_when_valid": float(valid_k.median()) if len(valid_k) else np.nan,
-        "mean_beta": float(group_df["beta"].mean()) if n else np.nan,
+        "mean_r_squared": float(r2_series.mean()) if len(r2_series) else np.nan,
     }
 
 
 def build_factor_rollups(condition_df):
-    """Summaries across model / model_family / trial_type / persona (and pairs)."""
+    """Summaries across model / model_family / trial_type / persona / option_order."""
     rows = []
 
     single_factors = [
@@ -147,6 +161,7 @@ def build_factor_rollups(condition_df):
         ("model_family", "model_family"),
         ("trial_type", "trial_type"),
         ("persona", "persona"),
+        ("option_order", "option_order"),
     ]
     for col, factor_name in single_factors:
         if col not in condition_df.columns:
@@ -161,6 +176,9 @@ def build_factor_rollups(condition_df):
         (("model_family", "persona"), "model_family_x_persona"),
         (("model_name", "persona"), "model_x_persona"),
         (("model_name", "trial_type"), "model_x_trial_type"),
+        (("option_order", "trial_type"), "option_order_x_trial_type"),
+        (("option_order", "persona"), "option_order_x_persona"),
+        (("model_name", "option_order"), "model_x_option_order"),
     ]
     for cols, factor_name in pair_specs:
         if any(c not in condition_df.columns for c in cols):
@@ -202,7 +220,8 @@ def write_summary_readme(summary_dir, human_k, k_lower_bound, k_upper_bound):
     readme = f"""# Waiting Game — factor summary
 
 Clean tables for scanning results across **model**, **trial type** (prompting
-mode: direct / chain-of-thought / one-shot / two-shot), and **persona** (on/off).
+mode: direct / chain-of-thought / one-shot / two-shot), **persona** (on/off),
+and **option_order** (pooled / sooner_A / sooner_B).
 
 Human benchmark (Rachlin et al. 1991): k = {human_k} per month.
 Reasonable k bounds (hits cut from reliability, still reported): [{k_lower_bound}, {k_upper_bound}].
@@ -211,7 +230,7 @@ Reasonable k bounds (hits cut from reliability, still reported): [{k_lower_bound
 
 | File | Contents |
 |---|---|
-| `by_condition.csv` | One row per **model × trial_type × persona** with competence gates, fit reliability, and fitted k. **Start here.** |
+| `by_condition.csv` | One row per **model × trial_type × persona × option_order** with competence gates, fit reliability, and fitted k. **Start here.** |
 | `by_factor.csv` | Rollups: pass rates and mean/median k (when valid) by each factor alone and useful pairs (e.g. trial_type × persona). |
 | `by_demographics.csv` | Present only when persona-on runs exist: gender / age-band strata from `analyze.py`. |
 | `sanity_check_summary.md` | Human-readable checklist table (same content as `results/tables/sanity_check_summary.md`). |
@@ -221,10 +240,11 @@ Reasonable k bounds (hits cut from reliability, still reported): [{k_lower_bound
 - **model_name** / **model_family**: full Ollama tag and coarse family (qwen2.5, qwen3, llama3.1, mistral).
 - **trial_type**: prompting condition (`direct`, `chain-of-thought`, `one-shot`, `two-shot`).
 - **persona**: `on` or `off` demographic persona framing.
-- **competence_passed**: monotonicity AND money-preference both pass.
-- **k_reliable**: choice sensitivity adequate AND fitted k not at bound.
+- **option_order**: `pooled` (all trials), `sooner_A` (sooner listed as option A), or `sooner_B` (sooner listed as option B).
+- **competence_passed**: monotonicity AND money-preference AND indifference-nonincreasing all pass.
+- **k_reliable**: hyperbolic NLS R^2 adequate, enough indifference points, AND fitted k not at bound.
 - **valid_discount_rate**: competence_passed AND k_reliable — trust the fitted k only when this is true.
-- **k**, **k_ci_low**, **k_ci_high**, **beta**: hyperbolic fit (shown even when invalid; check flags first).
+- **k**, **k_ci_low**, **k_ci_high**, **r_squared**: two-step hyperbolic fit to empirical immediate equivalents (shown even when invalid; check flags first).
 
 Regenerate with: `python src/compare_modes.py`
 """
@@ -266,32 +286,60 @@ def write_factor_summary_folder(combined_df, tables_dir, summary_dir, human_k,
 def build_sanity_check_markdown(combined_df, human_k, k_lower_bound, k_upper_bound):
     """One presentable Markdown table with every sanity check (competence
     gate + fit-reliability gate) side by side, across every model x mode
-    x persona that has been run, sorted model-major / mode-minor.
+    x persona x option_order that has been run.
     """
     sortable_df = combined_df.copy()
+    if "option_order" not in sortable_df.columns:
+        sortable_df["option_order"] = "pooled"
     sortable_df["_mode_order"] = sortable_df["reasoning_mode"].map(MODE_SORT_ORDER)
     sortable_df["_persona_order"] = sortable_df.get("persona_enabled", False)
+    sortable_df["_order_order"] = sortable_df["option_order"].map(
+        lambda o: OPTION_ORDER_SORT.get(o, 99)
+    )
     sort_cols = ["model_name", "_mode_order"]
     if "persona_enabled" in sortable_df.columns:
         sort_cols.append("_persona_order")
+    sort_cols.append("_order_order")
     sortable_df = sortable_df.sort_values(sort_cols)
 
-    header = (
-        "| Model | Mode | Persona | Monotonicity | Money Pref. | Competence Pass | "
-        "Beta (choice sens.) | k Reliable? | **Valid Discount Rate** | Fitted k [95% CI] |"
-    )
-    separator = "|---|---|---|---|---|---|---|---|---|---|"
+    has_indiff = "indifference_nonincreasing_passed" in sortable_df.columns
+    if has_indiff:
+        header = (
+            "| Model | Mode | Persona | Order | Monotonicity | Money Pref. | Indiff. Non-incr. | "
+            "Competence Pass | R^2 (indiff. fit) | k Reliable? | **Valid Discount Rate** | Fitted k [95% CI] |"
+        )
+        separator = "|---|---|---|---|---|---|---|---|---|---|---|---|"
+    else:
+        header = (
+            "| Model | Mode | Persona | Order | Monotonicity | Money Pref. | Competence Pass | "
+            "R^2 (indiff. fit) | k Reliable? | **Valid Discount Rate** | Fitted k [95% CI] |"
+        )
+        separator = "|---|---|---|---|---|---|---|---|---|---|---|"
     rows = [header, separator]
     for _, row in sortable_df.iterrows():
         mode_label = MODE_DISPLAY_LABELS.get(row["reasoning_mode"], row["reasoning_mode"])
         persona_label = "on" if bool(row.get("persona_enabled", False)) else "off"
-        rows.append(
-            f"| {row['model_name']} | {mode_label} | {persona_label} | "
-            f"{checkmark(row['monotonicity_passed'])} | "
-            f"{checkmark(row['money_preference_passed'])} | {checkmark(row['overall_passed'])} | "
-            f"{row['beta']:.4f} | {checkmark(row['k_is_reliable'])} | "
-            f"**{checkmark(row['valid_discount_rate'])}** | {format_k_with_ci(row)} |"
-        )
+        order_label = row.get("option_order", "pooled")
+        r2 = row["r_squared"] if "r_squared" in row and not pd.isna(row["r_squared"]) else float("nan")
+        r2_str = "-" if pd.isna(r2) else f"{r2:.3f}"
+        if has_indiff:
+            rows.append(
+                f"| {row['model_name']} | {mode_label} | {persona_label} | {order_label} | "
+                f"{checkmark(row['monotonicity_passed'])} | "
+                f"{checkmark(row['money_preference_passed'])} | "
+                f"{checkmark(row['indifference_nonincreasing_passed'])} | "
+                f"{checkmark(row['overall_passed'])} | "
+                f"{r2_str} | {checkmark(row['k_is_reliable'])} | "
+                f"**{checkmark(row['valid_discount_rate'])}** | {format_k_with_ci(row)} |"
+            )
+        else:
+            rows.append(
+                f"| {row['model_name']} | {mode_label} | {persona_label} | {order_label} | "
+                f"{checkmark(row['monotonicity_passed'])} | "
+                f"{checkmark(row['money_preference_passed'])} | {checkmark(row['overall_passed'])} | "
+                f"{r2_str} | {checkmark(row['k_is_reliable'])} | "
+                f"**{checkmark(row['valid_discount_rate'])}** | {format_k_with_ci(row)} |"
+            )
     table_markdown = "\n".join(rows)
 
     modes_present = ", ".join(MODE_DISPLAY_LABELS.get(m, m) for m in sortable_df["reasoning_mode"].unique())
@@ -300,18 +348,24 @@ def build_sanity_check_markdown(combined_df, human_k, k_lower_bound, k_upper_bou
 Modes included: {modes_present}. Human benchmark (Rachlin et al. 1991): k = {human_k} per month.
 Reasonable k bounds (hits cut from reliability, still reported): [{k_lower_bound}, {k_upper_bound}].
 
+Fitting method: per delay, interpolate the sooner amount at P(choose sooner)=0.5, then
+nonlinear least-squares fit of x(d) = $later / (1 + k*d) to those empirical immediate equivalents.
+Results stratified by A/B option order (pooled / sooner_A / sooner_B).
+
 {table_markdown}
 
 ## Column definitions
 
 - **Monotonicity**: P(choose sooner) does not decrease as the sooner amount increases, for every delay (`competence_checks.py::check_monotonicity`).
 - **Money Pref.**: model doesn't prefer $0 now over positive delayed money, at any delay (`check_money_preference`).
-- **Competence Pass**: Monotonicity AND Money Pref. both pass (`overall_passed`).
-- **Beta (choice sens.)**: fitted logistic sensitivity of choices to the amount/delay tradeoff; values below 0.05 mean choices barely track option value at all, so any fitted k is statistically unidentifiable (`fit_discounting.py`).
-- **k Reliable?**: beta >= threshold AND fitted k did not land at the optimizer's boundary ([{k_lower_bound}, {k_upper_bound}]). Bound hits are cut from reliability; the bound values themselves are still reported.
+- **Indiff. Non-incr.**: empirical 50% immediate equivalents x*(d) are non-increasing in delay (`check_indifference_nonincreasing`).
+- **Competence Pass**: Monotonicity AND Money Pref. AND Indiff. Non-incr. all pass (`overall_passed`).
+- **R^2 (indiff. fit)**: goodness of fit of the hyperbolic indifference curve to the per-delay 50% switching points.
+- **k Reliable?**: R^2 above threshold, enough indifference points, AND fitted k did not land at the optimizer's boundary ([{k_lower_bound}, {k_upper_bound}]). Bound hits are cut from reliability; the bound values themselves are still reported.
 - **Valid Discount Rate**: Competence Pass AND k Reliable \u2014 the single bottom-line flag for whether the fitted k should be trusted at all.
 - **Fitted k [95% CI]**: hyperbolic discount rate per month with bootstrap 95% CI, shown regardless of reliability (compare against the "k Reliable?"/"Valid Discount Rate" columns before interpreting).
 - **Persona**: on/off demographic persona framing; demographic strata (gender, age band) are in `by_demographics.csv` / `comparison_summary_by_demographics*.csv` when persona-on data exists.
+- **Order**: `pooled` / `sooner_A` / `sooner_B` — whether the sooner option was listed as A or B (or all trials pooled).
 """
     return legend
 
@@ -338,7 +392,12 @@ def load_available_mode_tables(tables_dir, modes):
 
 
 def plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_dir):
-    model_names = sorted(combined_df["model_name"].unique())
+    # Persona-off + pooled option order (fallback to all rows if strata missing).
+    plot_df = combined_df[~combined_df["persona_enabled"].astype(bool)].copy()
+    if "option_order" in plot_df.columns and (plot_df["option_order"] == "pooled").any():
+        plot_df = plot_df[plot_df["option_order"] == "pooled"]
+
+    model_names = sorted(plot_df["model_name"].unique())
     n_models = len(model_names)
     n_modes = len(modes_present)
     bar_width = 0.8 / max(n_modes, 1)
@@ -346,10 +405,7 @@ def plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_d
     figure, (axis_competence, axis_k) = plt.subplots(1, 2, figsize=(14, 5.5))
 
     for mode_index, reasoning_mode in enumerate(modes_present):
-        mode_df = combined_df[
-            (combined_df["reasoning_mode"] == reasoning_mode)
-            & (~combined_df["persona_enabled"].astype(bool))
-        ].set_index("model_name")
+        mode_df = plot_df[plot_df["reasoning_mode"] == reasoning_mode].set_index("model_name")
         x_positions = np.arange(n_models) + (mode_index - (n_modes - 1) / 2) * bar_width
         color = MODE_COLORS.get(reasoning_mode, None)
         label = MODE_DISPLAY_LABELS.get(reasoning_mode, reasoning_mode)
@@ -370,14 +426,14 @@ def plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_d
     axis_competence.set_xticklabels(model_names, rotation=20, ha="right")
     axis_competence.set_ylim(-0.1, 1.1)
     axis_competence.set_ylabel("Valid discount rate (competence-checks pass AND k reliable)")
-    axis_competence.set_title("Does prompting yield a valid hyperbolic fit? (persona-off)")
+    axis_competence.set_title("Does prompting yield a valid hyperbolic fit? (persona-off, pooled order)")
     axis_competence.legend(fontsize=8)
 
     axis_k.axhline(human_k, color="black", linestyle="--", linewidth=1, label=f"human benchmark k={human_k}")
     axis_k.set_xticks(np.arange(n_models))
     axis_k.set_xticklabels(model_names, rotation=20, ha="right")
     axis_k.set_ylabel("Fitted k per month (only shown where valid_discount_rate=True)")
-    axis_k.set_title("Fitted hyperbolic discount rate by mode (persona-off)")
+    axis_k.set_title("Fitted hyperbolic discount rate by mode (persona-off, pooled order)")
     axis_k.legend(fontsize=8)
 
     figure.suptitle("Effect of reasoning mode (direct / CoT / one-shot / two-shot) on Waiting Game results")
@@ -418,10 +474,16 @@ def main():
     combined_df.to_csv(combined_csv_path, index=False)
 
     print(f"\n=== Cross-mode comparison ===")
-    print(combined_df[[
-        "model_name", "reasoning_mode", "persona_enabled", "monotonicity_passed", "money_preference_passed",
+    print_cols = [
+        "model_name", "reasoning_mode", "persona_enabled", "option_order",
+        "monotonicity_passed", "money_preference_passed",
+        "indifference_nonincreasing_passed",
         "k_is_reliable", "valid_discount_rate", "k",
-    ]].sort_values(["model_name", "reasoning_mode", "persona_enabled"]).to_string(index=False))
+    ]
+    print_cols = [c for c in print_cols if c in combined_df.columns]
+    sort_cols = [c for c in ["model_name", "reasoning_mode", "persona_enabled", "option_order"]
+                 if c in combined_df.columns]
+    print(combined_df[print_cols].sort_values(sort_cols).to_string(index=False))
     print(f"\nWrote combined table to {combined_csv_path}")
 
     modes_present = sorted(
@@ -441,10 +503,12 @@ def main():
         combined_df, tables_dir, summary_dir, human_k, k_lower, k_upper, sanity_check_markdown
     )
     print(f"\n=== Factor summary folder ({summary_dir}) ===")
-    print(condition_df[[
-        "model_name", "trial_type", "persona", "competence_passed",
+    cond_print = [
+        "model_name", "trial_type", "persona", "option_order", "competence_passed",
         "k_reliable", "valid_discount_rate", "k",
-    ]].to_string(index=False))
+    ]
+    cond_print = [c for c in cond_print if c in condition_df.columns]
+    print(condition_df[cond_print].to_string(index=False))
     print(f"\nFactor rollups ({len(rollup_df)} rows):")
     print(rollup_df.head(20).to_string(index=False))
     for path in written_paths:
