@@ -1,8 +1,9 @@
 # Waiting Game — factor summary
 
 Clean tables for scanning results across **model**, **trial type** (prompting
-mode: direct / chain-of-thought / one-shot / two-shot), **persona** (on/off),
-and **option_order** (pooled / sooner_A / sooner_B).
+mode: direct / chain-of-thought), **persona** (on/off), **persona_id** /
+**persona_discounting_group** (behavioral personas), and **option_order**
+(pooled / sooner_A / sooner_B).
 
 Human benchmark (Rachlin et al. 1991): k = 0.01 per month.
 Reasonable k bounds (hits cut from reliability, still reported): [1e-06, 10.0].
@@ -11,16 +12,17 @@ Reasonable k bounds (hits cut from reliability, still reported): [1e-06, 10.0].
 
 | File | Contents |
 |---|---|
-| `by_condition.csv` | One row per **model × trial_type × persona × option_order** with competence gates, fit reliability, and fitted k. **Start here.** |
+| `by_condition.csv` | One row per **model × trial_type × persona × persona_id × option_order** with competence gates, fit reliability, and fitted k. **Start here.** |
 | `by_factor.csv` | Rollups: pass rates and mean/median k (when valid) by each factor alone and useful pairs (e.g. trial_type × persona). |
-| `by_demographics.csv` | Present only when persona-on runs exist: gender / age-band strata from `analyze.py`. |
+| `by_persona.csv` | Present only when persona-on runs exist: discounting_group / persona_id strata from `analyze.py`. |
 | `sanity_check_summary.md` | Human-readable checklist table (same content as `results/tables/sanity_check_summary.md`). |
 
 ## `by_condition.csv` columns
 
 - **model_name** / **model_family**: full Ollama tag and coarse family (qwen2.5, qwen3, llama3.1, mistral).
-- **trial_type**: prompting condition (`direct`, `chain-of-thought`, `one-shot`, `two-shot`).
-- **persona**: `on` or `off` demographic persona framing.
+- **trial_type**: prompting condition (`direct`, `chain-of-thought`).
+- **persona**: `on` or `off` behavioral persona framing.
+- **persona_id** / **persona_label** / **persona_discounting_group**: specific lifestyle persona and researcher-only greater/lesser tag (null when persona=off).
 - **option_order**: `pooled` (all trials), `sooner_A` (sooner listed as option A), or `sooner_B` (sooner listed as option B).
 - **competence_passed**: monotonicity AND money-preference AND indifference-nonincreasing all pass.
 - **k_reliable**: hyperbolic NLS R^2 adequate, enough indifference points, AND fitted k not at bound.

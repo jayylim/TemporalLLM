@@ -5,7 +5,7 @@ Identical parsing logic to ../temporal-discounting/src/parse_responses.py
 cot, long reasoning text preceding a "FINAL ANSWER: A/B" line). Unparseable
 responses are logged as parse failures (None) rather than guessed/imputed.
 
-Usage: python src/parse_responses.py [--config path/to/config.yaml] [--mode direct|cot|one_shot|two_shot]
+Usage: python src/parse_responses.py [--config path/to/config.yaml] [--mode direct|cot]
 """
 
 import argparse

@@ -1,0 +1,5 @@
+{
+    "max_hourly_transactions": 5,
+    "unusual_category": "casinos",
+    "high_value_threshold": 10000
+}

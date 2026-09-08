@@ -1,0 +1,9 @@
+timestamp,amount,category,is_flagged
+2025-07-28T10:05:00Z,75.50,groceries,FALSE
+2025-07-28T10:15:00Z,120.00,electronics,FALSE
+2025-07-28T11:30:00Z,2500.00,online_shopping,FALSE
+2025-07-28T12:01:00Z,500.00,casinos,FALSE
+2025-07-28T13:45:00Z,1600.00,online_shopping,FALSE
+2025-07-28T14:20:00Z,1750.00,online_shopping,FALSE
+2025-07-28T15:00:00Z,11000.00,wire_transfer,FALSE
+2025-07-28T16:10:00Z,1550.00,online_shopping,FALSE

@@ -21,7 +21,7 @@
    binarizing stochastic LLM outputs. Hand-scoring above is retained purely
    for comparability to human normative tables.
 
-Usage: python src/fit_discounting.py [--config path/to/config.yaml] [--mode direct|cot|one_shot|two_shot]
+Usage: python src/fit_discounting.py [--config path/to/config.yaml] [--mode direct|cot]
 """
 
 import argparse

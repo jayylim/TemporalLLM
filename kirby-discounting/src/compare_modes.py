@@ -21,14 +21,10 @@ from run_experiment import REASONING_MODES
 MODE_DISPLAY_LABELS = {
     "direct": "direct",
     "cot": "chain-of-thought",
-    "one_shot": "one-shot",
-    "two_shot": "two-shot",
 }
 MODE_COLORS = {
     "direct": "#1f77b4",
     "cot": "#ff7f0e",
-    "one_shot": "#2ca02c",
-    "two_shot": "#d62728",
 }
 MODE_SORT_ORDER = {mode: index for index, mode in enumerate(REASONING_MODES)}
 

@@ -1,8 +1,6 @@
-# Small pilot config: N=2 samples/item on qwen2.5:1.5b-instruct only, to
-# validate the end-to-end pipeline (generate -> parse -> competence ->
-# fit -> analyze) before committing to the full N=30 x 3-model run.
-# Writes to separate data/results directories so it never touches the real
-# results collected under config.yaml.
+# Small pilot config: N=2 samples/item on qwen3:4b only, to validate the
+# end-to-end pipeline before a full multi-model run. Writes to separate
+# data/results directories so it never touches results under config.yaml.
 
 ollama:
   base_url: "http://localhost:11434"
@@ -12,7 +10,7 @@ ollama:
   retry_backoff_s: 2
 
 models:
-  - qwen2.5:1.5b-instruct
+  - qwen3:4b-instruct-2507-fp16
 
 kirby:
   items_file: "kirby27_items.yaml"
@@ -34,22 +32,6 @@ kirby:
     exactly as "FINAL ANSWER: A" or "FINAL ANSWER: B", with no other text on
     that line.
   cot_num_predict: 100
-
-  few_shot_example_order_seed: 20260825
-  one_shot_examples:
-    - sir_amount_dollars: 10
-      ldr_amount_dollars: 1000000
-      delay_days: 10
-      correct_choice: later
-  two_shot_examples:
-    - sir_amount_dollars: 10
-      ldr_amount_dollars: 1000000
-      delay_days: 10
-      correct_choice: later
-    - sir_amount_dollars: 95
-      ldr_amount_dollars: 100
-      delay_days: 300
-      correct_choice: sooner
 
 competence_checks:
   min_consistency_score: 0.75

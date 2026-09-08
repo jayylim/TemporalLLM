@@ -1,22 +1,217 @@
-model_name,persona_enabled,option_order,k,k_ci_low,k_ci_high,r_squared,n_indifference_points,n_trials_fit,k_at_boundary,k_lower_bound,k_upper_bound,k_is_reliable,monotonicity_passed,money_preference_passed,indifference_nonincreasing_passed,n_indifference_violations,overall_passed,valid_discount_rate
-qwen2.5:1.5b-instruct,True,pooled,3.531193043085445,0.3820126915792368,4.752593701198467,-2.890652218478455,6,1800,False,1e-06,10.0,False,False,True,False,4,False,False
-qwen2.5:1.5b-instruct,True,sooner_A,0.0013684492869693,0.0013684492869693,0.0015522884578438,,6,913,False,1e-06,10.0,False,False,True,True,0,False,False
-qwen2.5:1.5b-instruct,True,sooner_B,5.7385130966457485,5.65330704046092,5.7385130966457485,,6,887,False,1e-06,10.0,False,False,False,True,0,False,False
-qwen2.5:3b-instruct,True,pooled,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,1800,False,1e-06,10.0,False,True,False,True,0,False,False
-qwen2.5:3b-instruct,True,sooner_A,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,913,False,1e-06,10.0,False,True,False,True,0,False,False
-qwen2.5:3b-instruct,True,sooner_B,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,887,False,1e-06,10.0,False,True,False,True,0,False,False
-qwen2.5:7b-instruct,True,pooled,1.1923117609685494,0.4801251503727304,5.526533965607003,0.6146889424346618,6,1800,False,1e-06,10.0,True,False,False,True,0,False,False
-qwen2.5:7b-instruct,True,sooner_A,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,913,False,1e-06,10.0,False,True,False,True,0,False,False
-qwen2.5:7b-instruct,True,sooner_B,0.144196649866704,0.0746990225660536,0.1666173821366486,0.8810652309128404,6,887,False,1e-06,10.0,True,True,False,False,1,False,False
-qwen3:4b-instruct-2507-q4_K_M,True,pooled,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,1800,False,1e-06,10.0,False,False,False,True,0,False,False
-qwen3:4b-instruct-2507-q4_K_M,True,sooner_A,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,913,False,1e-06,10.0,False,False,True,True,0,False,False
-qwen3:4b-instruct-2507-q4_K_M,True,sooner_B,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,887,False,1e-06,10.0,False,True,False,True,0,False,False
-qwen3:8b,True,pooled,,,,,0,0,True,1e-06,10.0,False,True,False,False,0,False,False
-qwen3:8b,True,sooner_A,,,,,0,0,True,1e-06,10.0,False,True,False,False,0,False,False
-qwen3:8b,True,sooner_B,,,,,0,0,True,1e-06,10.0,False,True,False,False,0,False,False
-llama3.1:8b-instruct-q4_K_M,True,pooled,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,1800,False,1e-06,10.0,False,False,False,True,0,False,False
-llama3.1:8b-instruct-q4_K_M,True,sooner_A,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,913,False,1e-06,10.0,False,False,False,True,0,False,False
-llama3.1:8b-instruct-q4_K_M,True,sooner_B,5.7385130966457485,5.7385130966457485,5.7385130966457485,,6,887,False,1e-06,10.0,False,False,False,True,0,False,False
-mistral:7b-instruct-q4_K_M,True,pooled,3.884852353183072,0.0464146276462856,5.5833155995826695,-8.27181364598252,6,1067,False,1e-06,10.0,False,False,False,False,1,False,False
-mistral:7b-instruct-q4_K_M,True,sooner_A,5.7385130966457485,1.7655914766817749,5.7385130966457485,,6,553,False,1e-06,10.0,False,False,False,True,0,False,False
-mistral:7b-instruct-q4_K_M,True,sooner_B,0.0013684492869693,0.0013684492869693,0.0066296525657309,,6,514,False,1e-06,10.0,False,False,True,True,0,False,False
+model_name,persona_enabled,persona_id,persona_label,persona_discounting_group,option_order,k,k_ci_low,k_ci_high,r_squared,n_indifference_points,n_trials_fit,k_at_boundary,k_lower_bound,k_upper_bound,k_is_reliable,monotonicity_passed,money_preference_passed,indifference_nonincreasing_passed,n_indifference_violations,overall_passed,valid_discount_rate
+qwen2.5:7b-instruct-q8_0,True,substance_use,Substance use,greater,pooled,2.667745236954733,0.9737317966827108,3.3816312732200093,-1.6539843612960508,7,1260,False,1e-06,10.0,False,False,False,False,1,False,False
+qwen2.5:7b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_B,0.3444120376118496,0.2203896184925559,0.6510855033038027,0.9006992506627034,7,626,False,1e-06,10.0,True,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,pooled,2.743360812828196,1.032735666258475,3.450752086216786,-1.5031480551484906,7,1260,False,1e-06,10.0,False,False,False,False,1,False,False
+qwen2.5:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,0.45790438503844,0.2039356849248892,0.639288410469099,0.9521246563170024,7,626,False,1e-06,10.0,True,False,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,pooled,1.8028784067910135,0.479696144132454,3.2860531548010923,-0.4320257758852652,7,1260,False,1e-06,10.0,False,False,False,False,1,False,False
+qwen2.5:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_A,5.651112883236467,4.89111228507895,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_B,0.1101650635331922,0.0895360001317402,0.2493140793789416,0.7882855957071558,7,626,False,1e-06,10.0,True,False,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,pooled,0.0626540757204683,0.0246488639315108,1.043681394811148,-0.326884468308644,7,1260,False,1e-06,10.0,False,False,False,False,2,False,False
+qwen2.5:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,4.1344847646164515,4.064348538953129,4.260654373295351,-12.058046876184289,7,634,False,1e-06,10.0,False,True,False,False,2,False,False
+qwen2.5:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,0.0097986182581725,0.0097986182581725,0.0220996860342288,0.556215016297527,7,626,False,1e-06,10.0,True,True,True,True,0,True,True
+qwen2.5:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,0.118601853849187,0.0515344515033333,1.9255945395532603,-0.4067962313608195,7,1260,False,1e-06,10.0,False,False,False,False,2,False,False
+qwen2.5:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,0.0165399397810623,0.0146163819426848,0.0267480182111137,0.7632994306518879,7,626,False,1e-06,10.0,True,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,pooled,0.0863439356793024,0.0539871785491445,1.3590322631062477,-0.1990796871875844,7,1260,False,1e-06,10.0,False,False,False,False,3,False,False
+qwen2.5:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,5.39311489435017,4.66857428215258,5.651112883236467,-195.47698778079013,7,634,False,1e-06,10.0,False,True,False,False,1,False,False
+qwen2.5:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,0.0360841434868797,0.020616111430733,0.0384548422123059,0.9087265561599264,7,626,False,1e-06,10.0,True,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,exercise,Exercise,lesser,pooled,1.6332048617524648,0.4245840325182272,2.2430014844965185,-0.7965538180363281,7,1260,False,1e-06,10.0,False,False,False,False,1,False,False
+qwen2.5:7b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_A,5.651112883236467,4.965485663773011,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen2.5:7b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_B,0.1005279826192436,0.09567435994153,0.2055310131841284,0.8299047487905584,7,626,False,1e-06,10.0,True,False,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,substance_use,Substance use,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,substance_use,Substance use,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,substance_use,Substance use,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,sugary_food,Sugary food,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,phone_social_media,Phone and social media,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,retail_spending,Retail spending,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,retail_spending,Retail spending,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,retail_spending,Retail spending,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,mindfulness,Mindfulness,lesser,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:4b-instruct-2507-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:4b-instruct-2507-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,0.637516367489602,0.2493140793789416,5.651112883236467,0.6879183042447715,7,626,False,1e-06,10.0,True,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,strategy_games,Strategy games,lesser,pooled,1.7325593910060857,0.1617001135684414,5.651112883236467,-0.3881703623056929,7,1260,False,1e-06,10.0,False,False,False,False,1,False,False
+qwen3:4b-instruct-2507-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,0.1101650635331922,0.1101650635331922,0.1101650635331922,0.7882855957071558,7,626,False,1e-06,10.0,True,False,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,exercise,Exercise,lesser,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:4b-instruct-2507-q8_0,True,exercise,Exercise,lesser,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:4b-instruct-2507-q8_0,True,exercise,Exercise,lesser,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,substance_use,Substance use,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,substance_use,Substance use,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,substance_use,Substance use,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:8b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,retail_spending,Retail spending,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:8b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,5.0513165549969,1.616585537199348,5.610092470031821,-6.73627351123949,7,1260,False,1e-06,10.0,False,False,False,False,2,False,False
+qwen3:8b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,0.0044432409260395,0.0041503379846804,0.0049898059764123,-10.720429753488023,7,634,False,1e-06,10.0,False,False,True,False,4,False,False
+qwen3:8b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3:8b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,5.428078892997549,4.298945130300265,5.604942264861614,-23.028409478483734,7,634,False,1e-06,10.0,False,False,True,False,1,False,False
+qwen3:8b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,strategy_games,Strategy games,lesser,pooled,5.0513165549969,1.6081015527053557,5.610092470031821,-6.73627351123949,7,1260,False,1e-06,10.0,False,False,False,False,2,False,False
+qwen3:8b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,0.0078827334057113,0.006789033548308,0.0089266454122873,-26.15468962309757,7,634,False,1e-06,10.0,False,True,True,False,4,False,False
+qwen3:8b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:8b-q8_0,True,exercise,Exercise,lesser,pooled,5.456039199543022,4.689121955485588,5.651112883236467,-344.7649892750504,7,1260,False,1e-06,10.0,False,False,False,False,1,False,False
+qwen3:8b-q8_0,True,exercise,Exercise,lesser,sooner_A,2.129264477273044,0.7089322998856801,2.312308935853653,-1.2345409800633012,7,634,False,1e-06,10.0,False,False,True,False,3,False,False
+qwen3:8b-q8_0,True,exercise,Exercise,lesser,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:32b-q8_0,True,substance_use,Substance use,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:32b-q8_0,True,substance_use,Substance use,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:32b-q8_0,True,substance_use,Substance use,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:32b-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,retail_spending,Retail spending,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3:32b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3:32b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,0.0097986182581725,0.0097986182581725,0.0159529636878253,0.556215016297527,7,1260,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3:32b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,0.0269434422687056,0.0216107511422986,0.082779759889937,0.815722435605612,7,634,False,1e-06,10.0,True,False,True,False,1,False,False
+qwen3:32b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,0.0097986182581725,0.0097986182581725,0.0097986182581725,0.556215016297527,7,626,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3:32b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,0.0750868258149222,0.0303807743100618,0.5937604621253779,0.2939254962229779,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3:32b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,5.651112883236467,0.637516367489602,5.651112883236467,,7,634,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3:32b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,0.0097986182581725,0.0055820019857582,0.0103509995158967,0.556215016297527,7,626,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3:32b-q8_0,True,strategy_games,Strategy games,lesser,pooled,0.0020393184105196,0.0014815133366029,0.0034075682205304,-7.903002387064436,7,1260,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,0.0048042872438138,0.0037761903459747,0.0058127714768053,0.4860701709635926,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3:32b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,0.0014815133366029,0.0014815133366029,0.0014815133366029,,7,626,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3:32b-q8_0,True,exercise,Exercise,lesser,pooled,0.0147405118262871,0.0097986182581725,0.0825225629442951,-0.1134121285694185,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3:32b-q8_0,True,exercise,Exercise,lesser,sooner_A,0.637516367489602,0.6107777299389754,0.637516367489602,0.6879183042447715,7,634,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3:32b-q8_0,True,exercise,Exercise,lesser,sooner_B,0.0097986182581725,0.0097986182581725,0.0097986182581725,0.556215016297527,7,626,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3.5:9b-q8_0,True,substance_use,Substance use,greater,pooled,5.651112883236467,0.3477703814791642,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:9b-q8_0,True,substance_use,Substance use,greater,sooner_A,0.2624246527077127,0.0084079703932477,2.2516259656344024,-0.5521003549825758,7,634,False,1e-06,10.0,False,False,True,False,3,False,False
+qwen3.5:9b-q8_0,True,substance_use,Substance use,greater,sooner_B,5.651112883236467,0.637516367489602,5.651112883236467,,7,626,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:9b-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,0.7176331893415456,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:9b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,0.0945119130342154,5.651112883236467,,7,634,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3.5:9b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,5.651112883236467,0.7176331893415456,5.651112883236467,,7,626,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:9b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,5.651112883236467,3.156486009628537,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:9b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,3.163006720497942,0.0031055470377044,4.494640975093868,-0.8954646430325519,7,634,False,1e-06,10.0,False,False,True,False,3,False,False
+qwen3.5:9b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,5.651112883236467,0.7176331893415456,5.651112883236467,,7,626,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:9b-q8_0,True,retail_spending,Retail spending,greater,pooled,0.0205474298891932,0.0019798942463994,2.5175418063923782,-0.6889685957477616,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:9b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,0.0825023001757913,0.0030851972944255,0.2027769149698502,-0.2855383355782672,7,634,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:9b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,0.0164041482496662,0.002078921555385,4.900361849926756,-1.2389269484121188,7,626,False,1e-06,10.0,False,False,False,False,1,False,False
+qwen3.5:9b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,0.0071315293635228,0.0016018827118854,0.024755348040043,-0.6676492385361106,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:9b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,0.0474599166249709,0.0023015179201455,0.8177828477016363,-1.6211585836477438,7,634,False,1e-06,10.0,False,False,True,False,3,False,False
+qwen3.5:9b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,0.0054745578518188,0.0014815133366029,0.0167254253850864,0.5827615192227411,7,626,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3.5:9b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,1.001447085873876,0.0107961520420647,3.950020631348236,-0.7601440122743752,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:9b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,0.8799279103286076,0.1039341881632922,5.261796491963359,0.4000604739095115,7,634,False,1e-06,10.0,False,False,True,False,1,False,False
+qwen3.5:9b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,0.0201032498250339,0.0017189768322809,0.6950171057657216,-1.2793438082712774,7,626,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:9b-q8_0,True,strategy_games,Strategy games,lesser,pooled,0.008270130385098,0.0024609929978269,0.0826408417508575,-1.1683027732487634,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:9b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,0.0179002025793714,0.0095495581309747,1.080205013240939,-1.1501346905819363,7,634,False,1e-06,10.0,False,False,True,False,3,False,False
+qwen3.5:9b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,0.0019822196703862,0.0014815133366029,0.073187112267358,-10.125529954248478,7,626,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3.5:9b-q8_0,True,exercise,Exercise,lesser,pooled,0.6838746839268899,0.016010549547172,3.1719210086310774,-0.8220447571789498,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:9b-q8_0,True,exercise,Exercise,lesser,sooner_A,0.2364479603284944,0.0086697681399238,1.3443480456172308,-0.7283153599194714,7,634,False,1e-06,10.0,False,False,True,False,3,False,False
+qwen3.5:9b-q8_0,True,exercise,Exercise,lesser,sooner_B,0.1300620281175496,0.0036138777719425,1.935031435301782,-0.4769337145777603,7,626,False,1e-06,10.0,False,False,False,False,3,False,False
+qwen3.5:27b-q8_0,True,substance_use,Substance use,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1222,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:27b-q8_0,True,substance_use,Substance use,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,613,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:27b-q8_0,True,substance_use,Substance use,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,609,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:27b-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3.5:27b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:27b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:27b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:27b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:27b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:27b-q8_0,True,retail_spending,Retail spending,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3.5:27b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3.5:27b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3.5:27b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,0.0014815133366029,0.0014815133366029,0.0024280486517087,,7,1260,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3.5:27b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,0.0042896260605565,0.002845968575709,0.0079120381589245,0.3883242292940776,7,634,False,1e-06,10.0,False,False,True,False,1,False,False
+qwen3.5:27b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,0.0014815133366029,0.0014815133366029,0.0014815133366029,,7,626,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3.5:27b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,0.0014815133366029,0.0014815133366029,0.0014815133366029,,7,1260,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3.5:27b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,0.0020659747283225,0.0014815133366029,0.0032406100379464,-7.085482703525582,7,634,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3.5:27b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,0.0014815133366029,0.0014815133366029,0.0014815133366029,,7,626,False,1e-06,10.0,False,True,True,True,0,True,False
+qwen3.5:27b-q8_0,True,strategy_games,Strategy games,lesser,pooled,0.0048283257675904,0.0014815133366029,0.0054896969410137,0.5492360731115256,7,1260,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3.5:27b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,0.0071957103436445,0.0058727122455548,0.0102041372827962,0.7603723210905297,7,634,False,1e-06,10.0,True,True,True,True,0,True,True
+qwen3.5:27b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,0.0014815133366029,0.0014815133366029,0.0014815133366029,,7,626,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3.5:27b-q8_0,True,exercise,Exercise,lesser,pooled,0.0032406100379464,0.0025585277346688,0.0129308414614328,0.0562312400830508,7,1260,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3.5:27b-q8_0,True,exercise,Exercise,lesser,sooner_A,0.0097220157110969,0.0052107551304348,0.0218907536128922,0.7573710593894919,7,634,False,1e-06,10.0,True,True,True,False,1,False,False
+qwen3.5:27b-q8_0,True,exercise,Exercise,lesser,sooner_B,0.0069198604512985,0.0014815133366029,0.0112811571685592,0.5947655841666076,7,626,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,substance_use,Substance use,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,substance_use,Substance use,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,substance_use,Substance use,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,5.651112883236467,4.598488401666817,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,retail_spending,Retail spending,greater,pooled,5.651112883236467,5.651112883236467,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,5.651112883236467,5.63771633200375,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,5.651112883236467,5.651112883236467,5.651112883236467,,7,626,False,1e-06,10.0,False,True,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,0.0908208455389905,0.0196300545751798,1.338385491110816,-0.0507513801330801,7,1260,False,1e-06,10.0,False,False,False,False,2,False,False
+qwen3.5:35b-a3b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,0.0074410819101187,0.0014815133366029,0.0176847755804476,0.0018183947654415,7,634,False,1e-06,10.0,False,False,False,False,2,False,False
+qwen3.5:35b-a3b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,5.651112883236467,0.6370962876812319,5.651112883236467,,7,626,False,1e-06,10.0,False,False,False,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,0.6192765276155395,0.1376462973901153,2.28334325144338,-0.7153034617229028,7,1260,False,1e-06,10.0,False,False,True,False,3,False,False
+qwen3.5:35b-a3b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,0.0329302494076145,0.0120905585794835,0.4335373306838781,0.3846378795740216,7,634,False,1e-06,10.0,False,False,True,False,1,False,False
+qwen3.5:35b-a3b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,1.3054405321571905,0.3296780100077453,5.651112883236467,0.7025628347984605,7,626,False,1e-06,10.0,True,False,True,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,strategy_games,Strategy games,lesser,pooled,0.9237820723339562,0.0600782641622458,3.357077579189888,-1.2926952847570234,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:35b-a3b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,0.0173948358160136,0.009351052765409,0.0279524414869635,0.8528444528845212,7,634,False,1e-06,10.0,True,False,True,False,1,False,False
+qwen3.5:35b-a3b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,5.651112883236467,0.637516367489602,5.651112883236467,,7,626,False,1e-06,10.0,False,False,True,True,0,False,False
+qwen3.5:35b-a3b-q8_0,True,exercise,Exercise,lesser,pooled,4.4102923766014515,0.4081378084414601,5.621710074490577,-4.125200402028262,7,1260,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:35b-a3b-q8_0,True,exercise,Exercise,lesser,sooner_A,0.0257940279149616,0.0131809235859566,0.1559577186465345,0.3167009222343752,7,634,False,1e-06,10.0,False,False,True,False,2,False,False
+qwen3.5:35b-a3b-q8_0,True,exercise,Exercise,lesser,sooner_B,5.651112883236467,4.800585256868958,5.651112883236467,,7,626,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,substance_use,Substance use,greater,pooled,5.651112883236467,1.236811361837996,5.651112883236467,,7,864,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,410,False,1e-06,10.0,False,True,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_B,0.0216338698368141,0.0014815133366029,0.2556520177991485,-0.4162828927170761,7,454,False,1e-06,10.0,False,False,True,False,2,False,False
+llama3.1:8b-instruct-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,1.7325593910060857,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,3.5595588786363153,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_B,0.0075141895527979,0.0061671353141887,4.688164359212647,-0.5743364060701526,7,626,False,1e-06,10.0,False,False,False,False,2,False,False
+llama3.1:8b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,pooled,5.651112883236467,0.637516367489602,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,5.651112883236467,5.405822429891064,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,0.1655978056101929,0.0097986182581725,0.637516367489602,0.2281676281839343,7,626,False,1e-06,10.0,False,False,False,False,1,False,False
+llama3.1:8b-instruct-q8_0,True,retail_spending,Retail spending,greater,pooled,5.651112883236467,0.7176331893415456,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_A,5.651112883236467,3.106086308697919,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_B,0.215831974643097,0.0088876036937847,4.688164359212647,-0.1447292506930961,7,626,False,1e-06,10.0,False,False,True,False,2,False,False
+llama3.1:8b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,pooled,5.651112883236467,0.7176331893415456,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,5.651112883236467,5.531042190698601,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,0.0696713183326531,0.0160133931089605,1.7325593910060857,-0.2075331902430108,7,626,False,1e-06,10.0,False,False,False,False,2,False,False
+llama3.1:8b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,5.651112883236467,3.106086308697919,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,0.0264906637002232,0.0239594787231294,4.987709896743449,-0.129541170355371,7,626,False,1e-06,10.0,False,False,False,False,2,False,False
+llama3.1:8b-instruct-q8_0,True,strategy_games,Strategy games,lesser,pooled,5.651112883236467,0.6144660523008059,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,5.651112883236467,4.409483315764408,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,0.0728780076114223,0.0094635698278975,2.491025297475227,-0.0671592105755818,7,626,False,1e-06,10.0,False,False,False,False,2,False,False
+llama3.1:8b-instruct-q8_0,True,exercise,Exercise,lesser,pooled,5.651112883236467,0.3477703814791642,5.651112883236467,,7,1260,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,634,False,1e-06,10.0,False,False,False,True,0,False,False
+llama3.1:8b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_B,0.0019809309948314,0.0014815133366029,0.1960054026593225,-0.5002304246798219,7,626,False,1e-06,10.0,False,False,False,False,1,False,False
+mistral:7b-instruct-q8_0,True,substance_use,Substance use,greater,pooled,3.1917985763350147,0.330100912540277,5.651112883236467,-2.870061599559727,7,694,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_A,5.651112883236467,5.306389656303729,5.651112883236467,,7,348,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_B,0.054114714288419,0.0043197142501603,0.3691228393923713,0.2793058531638547,7,346,False,1e-06,10.0,False,False,False,False,3,False,False
+mistral:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,pooled,5.651112883236467,2.7248053792989655,5.651112883236467,,7,764,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_A,5.651112883236467,1.537343527614466,5.651112883236467,,7,391,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_B,0.0066583640695474,0.0020988036796982,4.987709896743449,-1.5917652294420868,7,373,False,1e-06,10.0,False,False,False,False,2,False,False
+mistral:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,pooled,1.7325593910060857,0.1459284766945934,5.651112883236467,-0.3881703623056929,7,737,False,1e-06,10.0,False,False,False,False,1,False,False
+mistral:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,370,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,0.0256404059331782,0.0018053682565625,0.1483287163803546,-0.4787682442839145,7,367,False,1e-06,10.0,False,False,False,False,3,False,False
+mistral:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,pooled,5.651112883236467,0.1655978056101929,5.651112883236467,,7,735,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_A,5.651112883236467,5.651112883236467,5.651112883236467,,7,393,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_B,0.0024204099952817,0.0014815133366029,0.0250848068677796,-0.9871293476067846,7,342,False,1e-06,10.0,False,False,False,False,2,False,False
+mistral:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,pooled,0.0682170788669669,0.0036423204709938,3.864663407041855,-0.1715130809461609,7,703,False,1e-06,10.0,False,False,False,False,2,False,False
+mistral:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,5.651112883236467,1.7325593910060857,5.651112883236467,,7,371,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,0.0014815133366029,0.0014815133366029,0.0089268353916534,,7,332,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,0.151797050114991,0.027864822565819,4.664403869338537,-0.5089991111359327,7,755,False,1e-06,10.0,False,False,False,False,1,False,False
+mistral:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,5.651112883236467,5.298012826258512,5.651112883236467,,7,390,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,0.0014815133366029,0.0014815133366029,0.0107827708475825,,7,365,False,1e-06,10.0,False,False,True,True,0,False,False
+mistral:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,pooled,1.000882505425617,0.0042218139245005,4.983785631171219,0.7285860222760956,7,767,False,1e-06,10.0,True,False,False,False,1,False,False
+mistral:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,5.651112883236467,4.2836238749028706,5.651112883236467,,7,387,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,0.0014815133366029,0.0014815133366029,0.0019598191697303,,7,380,False,1e-06,10.0,False,False,True,True,0,False,False
+mistral:7b-instruct-q8_0,True,exercise,Exercise,lesser,pooled,3.8822802679176274,0.0256269526254165,5.516100915952176,-0.6921717380580956,7,717,False,1e-06,10.0,False,False,False,False,1,False,False
+mistral:7b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_A,5.651112883236467,4.848389183454278,5.651112883236467,,7,363,False,1e-06,10.0,False,False,False,True,0,False,False
+mistral:7b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_B,0.002823576696064,0.0014815133366029,0.0178422281744662,-0.7401732093986937,7,354,False,1e-06,10.0,False,False,True,False,1,False,False

@@ -1,22 +1,217 @@
-model_name,persona_enabled,option_order,monotonicity_passed,money_preference_passed,indifference_nonincreasing_passed,n_indifference_violations,overall_passed,k_lower_bound,k_upper_bound
-qwen2.5:1.5b-instruct,True,pooled,False,True,False,4,False,1e-06,10.0
-qwen2.5:1.5b-instruct,True,sooner_A,False,True,True,0,False,1e-06,10.0
-qwen2.5:1.5b-instruct,True,sooner_B,False,False,True,0,False,1e-06,10.0
-qwen2.5:3b-instruct,True,pooled,True,False,True,0,False,1e-06,10.0
-qwen2.5:3b-instruct,True,sooner_A,True,False,True,0,False,1e-06,10.0
-qwen2.5:3b-instruct,True,sooner_B,True,False,True,0,False,1e-06,10.0
-qwen2.5:7b-instruct,True,pooled,False,False,True,0,False,1e-06,10.0
-qwen2.5:7b-instruct,True,sooner_A,True,False,True,0,False,1e-06,10.0
-qwen2.5:7b-instruct,True,sooner_B,True,False,False,1,False,1e-06,10.0
-qwen3:4b-instruct-2507-q4_K_M,True,pooled,False,False,True,0,False,1e-06,10.0
-qwen3:4b-instruct-2507-q4_K_M,True,sooner_A,False,True,True,0,False,1e-06,10.0
-qwen3:4b-instruct-2507-q4_K_M,True,sooner_B,True,False,True,0,False,1e-06,10.0
-qwen3:8b,True,pooled,True,False,False,0,False,1e-06,10.0
-qwen3:8b,True,sooner_A,True,False,False,0,False,1e-06,10.0
-qwen3:8b,True,sooner_B,True,False,False,0,False,1e-06,10.0
-llama3.1:8b-instruct-q4_K_M,True,pooled,False,False,True,0,False,1e-06,10.0
-llama3.1:8b-instruct-q4_K_M,True,sooner_A,False,False,True,0,False,1e-06,10.0
-llama3.1:8b-instruct-q4_K_M,True,sooner_B,False,False,True,0,False,1e-06,10.0
-mistral:7b-instruct-q4_K_M,True,pooled,False,False,False,1,False,1e-06,10.0
-mistral:7b-instruct-q4_K_M,True,sooner_A,False,False,True,0,False,1e-06,10.0
-mistral:7b-instruct-q4_K_M,True,sooner_B,False,True,True,0,False,1e-06,10.0
+model_name,persona_enabled,persona_id,persona_label,persona_discounting_group,option_order,monotonicity_passed,money_preference_passed,indifference_nonincreasing_passed,n_indifference_violations,overall_passed,k_lower_bound,k_upper_bound
+qwen2.5:7b-instruct-q8_0,True,substance_use,Substance use,greater,pooled,False,False,False,1,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,pooled,False,False,False,1,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,False,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,pooled,False,False,False,1,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_B,False,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,pooled,False,False,False,2,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,True,False,False,2,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,True,True,True,0,True,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,False,False,False,2,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,pooled,False,False,False,3,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,True,False,False,1,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,exercise,Exercise,lesser,pooled,False,False,False,1,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen2.5:7b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_B,False,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,substance_use,Substance use,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,substance_use,Substance use,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,substance_use,Substance use,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,sugary_food,Sugary food,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,sugary_food,Sugary food,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,sugary_food,Sugary food,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,phone_social_media,Phone and social media,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,retail_spending,Retail spending,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,retail_spending,Retail spending,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,retail_spending,Retail spending,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,mindfulness,Mindfulness,lesser,pooled,True,True,True,0,True,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,strategy_games,Strategy games,lesser,pooled,False,False,False,1,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,False,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,exercise,Exercise,lesser,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,exercise,Exercise,lesser,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3:4b-instruct-2507-q8_0,True,exercise,Exercise,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,substance_use,Substance use,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,substance_use,Substance use,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,substance_use,Substance use,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,sugary_food,Sugary food,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3:8b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,retail_spending,Retail spending,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3:8b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,False,False,False,2,False,1e-06,10.0
+qwen3:8b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,False,True,False,4,False,1e-06,10.0
+qwen3:8b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,False,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,False,True,False,1,False,1e-06,10.0
+qwen3:8b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,strategy_games,Strategy games,lesser,pooled,False,False,False,2,False,1e-06,10.0
+qwen3:8b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,True,True,False,4,False,1e-06,10.0
+qwen3:8b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:8b-q8_0,True,exercise,Exercise,lesser,pooled,False,False,False,1,False,1e-06,10.0
+qwen3:8b-q8_0,True,exercise,Exercise,lesser,sooner_A,False,True,False,3,False,1e-06,10.0
+qwen3:8b-q8_0,True,exercise,Exercise,lesser,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,substance_use,Substance use,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,substance_use,Substance use,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,substance_use,Substance use,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,sugary_food,Sugary food,greater,pooled,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,retail_spending,Retail spending,greater,pooled,False,True,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,False,True,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,False,True,False,1,False,1e-06,10.0
+qwen3:32b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,False,True,False,2,False,1e-06,10.0
+qwen3:32b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,False,True,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,strategy_games,Strategy games,lesser,pooled,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,True,True,True,0,True,1e-06,10.0
+qwen3:32b-q8_0,True,exercise,Exercise,lesser,pooled,False,True,False,2,False,1e-06,10.0
+qwen3:32b-q8_0,True,exercise,Exercise,lesser,sooner_A,False,True,True,0,False,1e-06,10.0
+qwen3:32b-q8_0,True,exercise,Exercise,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,substance_use,Substance use,greater,pooled,False,False,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,substance_use,Substance use,greater,sooner_A,False,True,False,3,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,substance_use,Substance use,greater,sooner_B,False,False,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,sugary_food,Sugary food,greater,pooled,False,False,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,False,True,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,False,False,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,False,False,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,False,True,False,3,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,False,False,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,retail_spending,Retail spending,greater,pooled,False,True,False,2,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,False,True,False,2,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,False,False,False,1,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,False,True,False,2,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,False,True,False,3,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,False,True,False,2,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,False,True,False,1,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,False,True,False,2,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,strategy_games,Strategy games,lesser,pooled,False,True,False,2,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,False,True,False,3,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,exercise,Exercise,lesser,pooled,False,True,False,2,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,exercise,Exercise,lesser,sooner_A,False,True,False,3,False,1e-06,10.0
+qwen3.5:9b-q8_0,True,exercise,Exercise,lesser,sooner_B,False,False,False,3,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,substance_use,Substance use,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,substance_use,Substance use,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,substance_use,Substance use,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,sugary_food,Sugary food,greater,pooled,True,True,True,0,True,1e-06,10.0
+qwen3.5:27b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,False,False,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,retail_spending,Retail spending,greater,pooled,True,True,True,0,True,1e-06,10.0
+qwen3.5:27b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3.5:27b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,True,True,True,0,True,1e-06,10.0
+qwen3.5:27b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,False,True,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,False,True,False,1,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,True,True,True,0,True,1e-06,10.0
+qwen3.5:27b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3.5:27b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,True,True,True,0,True,1e-06,10.0
+qwen3.5:27b-q8_0,True,strategy_games,Strategy games,lesser,pooled,False,True,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,True,True,True,0,True,1e-06,10.0
+qwen3.5:27b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,exercise,Exercise,lesser,pooled,False,True,True,0,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,exercise,Exercise,lesser,sooner_A,True,True,False,1,False,1e-06,10.0
+qwen3.5:27b-q8_0,True,exercise,Exercise,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,substance_use,Substance use,greater,pooled,True,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,substance_use,Substance use,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,substance_use,Substance use,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,sugary_food,Sugary food,greater,pooled,False,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,sugary_food,Sugary food,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,sugary_food,Sugary food,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,phone_social_media,Phone and social media,greater,pooled,False,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,retail_spending,Retail spending,greater,pooled,False,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,retail_spending,Retail spending,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,retail_spending,Retail spending,greater,sooner_B,True,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,mindfulness,Mindfulness,lesser,pooled,False,False,False,2,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,False,False,False,2,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,False,False,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,False,True,False,3,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,False,True,False,1,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,strategy_games,Strategy games,lesser,pooled,False,True,False,2,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,False,True,False,1,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,exercise,Exercise,lesser,pooled,False,True,False,2,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,exercise,Exercise,lesser,sooner_A,False,True,False,2,False,1e-06,10.0
+qwen3.5:35b-a3b-q8_0,True,exercise,Exercise,lesser,sooner_B,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,substance_use,Substance use,greater,pooled,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_A,True,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_B,False,True,False,2,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,sugary_food,Sugary food,greater,pooled,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_B,False,False,False,2,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,pooled,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,False,False,False,1,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,retail_spending,Retail spending,greater,pooled,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_B,False,True,False,2,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,pooled,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,False,False,False,2,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,False,False,False,2,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,strategy_games,Strategy games,lesser,pooled,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,False,False,False,2,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,exercise,Exercise,lesser,pooled,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_A,False,False,True,0,False,1e-06,10.0
+llama3.1:8b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_B,False,False,False,1,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,substance_use,Substance use,greater,pooled,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,substance_use,Substance use,greater,sooner_B,False,False,False,3,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,pooled,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,sugary_food,Sugary food,greater,sooner_B,False,False,False,2,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,pooled,False,False,False,1,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,phone_social_media,Phone and social media,greater,sooner_B,False,False,False,3,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,pooled,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_A,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,retail_spending,Retail spending,greater,sooner_B,False,False,False,2,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,pooled,False,False,False,2,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_A,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,mindfulness,Mindfulness,lesser,sooner_B,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,pooled,False,False,False,1,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,pooled,False,False,False,1,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_A,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,strategy_games,Strategy games,lesser,sooner_B,False,True,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,exercise,Exercise,lesser,pooled,False,False,False,1,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_A,False,False,True,0,False,1e-06,10.0
+mistral:7b-instruct-q8_0,True,exercise,Exercise,lesser,sooner_B,False,True,False,1,False,1e-06,10.0

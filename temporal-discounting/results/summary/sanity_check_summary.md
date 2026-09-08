@@ -1,144 +1,257 @@
 # Waiting Game: Sanity Check Summary
 
-Modes included: direct, one-shot, two-shot. Human benchmark (Rachlin et al. 1991): k = 0.01 per month.
+Modes included: direct. Human benchmark (Rachlin et al. 1991): k = 0.01 per month.
 Reasonable k bounds (hits cut from reliability, still reported): [1e-06, 10.0].
 
 Fitting method: per delay, interpolate the sooner amount at P(choose sooner)=0.5, then
 nonlinear least-squares fit of x(d) = $later / (1 + k*d) to those empirical immediate equivalents.
 Results stratified by A/B option order (pooled / sooner_A / sooner_B).
 
-
-| Model                         | Mode     | Persona | Order    | Monotonicity | Money Pref. | Indiff. Non-incr. | Competence Pass | R^2 (indiff. fit) | k Reliable? | **Valid Discount Rate** | Fitted k [95% CI]       |
-| ----------------------------- | -------- | ------- | -------- | ------------ | ----------- | ----------------- | --------------- | ----------------- | ----------- | ----------------------- | ----------------------- |
-| llama3.1:8b-instruct-q4_K_M   | direct   | off     | pooled   | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | direct   | off     | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | direct   | off     | sooner_B | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.3873, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | direct   | on      | pooled   | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | direct   | on      | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | direct   | on      | sooner_B | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | one-shot | off     | pooled   | ❌            | ❌           | ❌                 | ❌               | 0.008             | ❌           | **❌**                   | 0.1622 [0.1398, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | one-shot | off     | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [1.7656, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | one-shot | off     | sooner_B | ❌            | ✅           | ❌                 | ❌               | -0.513            | ❌           | **❌**                   | 0.1063 [0.0146, 0.1474] |
-| llama3.1:8b-instruct-q4_K_M   | one-shot | on      | pooled   | ❌            | ❌           | ❌                 | ❌               | 0.521             | ✅           | **❌**                   | 0.1272 [0.0464, 1.5442] |
-| llama3.1:8b-instruct-q4_K_M   | one-shot | on      | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [0.6439, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | one-shot | on      | sooner_B | ❌            | ✅           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0146, 0.1104] |
-| llama3.1:8b-instruct-q4_K_M   | two-shot | off     | pooled   | ❌            | ❌           | ✅                 | ❌               | 0.725             | ✅           | **❌**                   | 0.2517 [0.1051, 0.7333] |
-| llama3.1:8b-instruct-q4_K_M   | two-shot | off     | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [0.1991, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | two-shot | off     | sooner_B | ❌            | ❌           | ✅                 | ❌               | 0.759             | ✅           | **❌**                   | 0.1085 [0.0146, 0.2517] |
-| llama3.1:8b-instruct-q4_K_M   | two-shot | on      | pooled   | ❌            | ❌           | ✅                 | ❌               | 0.759             | ✅           | **❌**                   | 0.1085 [0.1085, 0.2583] |
-| llama3.1:8b-instruct-q4_K_M   | two-shot | on      | sooner_A | ❌            | ❌           | ❌                 | ❌               | 0.403             | ❌           | **❌**                   | 0.2583 [0.1085, 5.7385] |
-| llama3.1:8b-instruct-q4_K_M   | two-shot | on      | sooner_B | ❌            | ❌           | ❌                 | ❌               | -0.057            | ❌           | **❌**                   | 0.0809 [0.0146, 0.1085] |
-| mistral:7b-instruct-q4_K_M    | direct   | off     | pooled   | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [0.1622, 5.7385] |
-| mistral:7b-instruct-q4_K_M    | direct   | off     | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| mistral:7b-instruct-q4_K_M    | direct   | off     | sooner_B | ❌            | ✅           | ❌                 | ❌               | -0.003            | ❌           | **❌**                   | 0.0183 [0.0018, 0.0471] |
-| mistral:7b-instruct-q4_K_M    | direct   | on      | pooled   | ❌            | ❌           | ❌                 | ❌               | -8.272            | ❌           | **❌**                   | 3.8849 [0.0464, 5.5833] |
-| mistral:7b-instruct-q4_K_M    | direct   | on      | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [1.7656, 5.7385] |
-| mistral:7b-instruct-q4_K_M    | direct   | on      | sooner_B | ❌            | ✅           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0066] |
-| mistral:7b-instruct-q4_K_M    | one-shot | off     | pooled   | ❌            | ❌           | ❌                 | ❌               | -0.206            | ❌           | **❌**                   | 0.1893 [0.0238, 4.0851] |
-| mistral:7b-instruct-q4_K_M    | one-shot | off     | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7370, 5.7385] |
-| mistral:7b-instruct-q4_K_M    | one-shot | off     | sooner_B | ❌            | ✅           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0022] |
-| mistral:7b-instruct-q4_K_M    | one-shot | on      | pooled   | ❌            | ✅           | ❌                 | ❌               | 0.118             | ❌           | **❌**                   | 0.1663 [0.0020, 3.8592] |
-| mistral:7b-instruct-q4_K_M    | one-shot | on      | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [3.1533, 5.7385] |
-| mistral:7b-instruct-q4_K_M    | one-shot | on      | sooner_B | ❌            | ✅           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0018] |
-| mistral:7b-instruct-q4_K_M    | two-shot | off     | pooled   | ❌            | ❌           | ❌                 | ❌               | -2.236            | ❌           | **❌**                   | 3.7160 [0.1085, 5.7060] |
-| mistral:7b-instruct-q4_K_M    | two-shot | off     | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| mistral:7b-instruct-q4_K_M    | two-shot | off     | sooner_B | ❌            | ✅           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0035] |
-| mistral:7b-instruct-q4_K_M    | two-shot | on      | pooled   | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [0.3722, 5.7385] |
-| mistral:7b-instruct-q4_K_M    | two-shot | on      | sooner_A | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [0.7333, 5.7385] |
-| mistral:7b-instruct-q4_K_M    | two-shot | on      | sooner_B | ❌            | ✅           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0040] |
-| qwen2.5:1.5b-instruct         | direct   | off     | pooled   | ❌            | ❌           | ❌                 | ❌               | -1.385            | ❌           | **❌**                   | 0.5359 [0.0034, 3.6317] |
-| qwen2.5:1.5b-instruct         | direct   | off     | sooner_A | ❌            | ❌           | ❌                 | ❌               | -99.232           | ❌           | **❌**                   | 5.6425 [3.1533, 5.7385] |
-| qwen2.5:1.5b-instruct         | direct   | off     | sooner_B | ❌            | ✅           | ❌                 | ❌               | -2.098            | ❌           | **❌**                   | 0.0017 [0.0014, 0.0112] |
-| qwen2.5:1.5b-instruct         | direct   | on      | pooled   | ❌            | ✅           | ❌                 | ❌               | -2.891            | ❌           | **❌**                   | 3.5312 [0.3820, 4.7526] |
-| qwen2.5:1.5b-instruct         | direct   | on      | sooner_A | ❌            | ✅           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0016] |
-| qwen2.5:1.5b-instruct         | direct   | on      | sooner_B | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.6533, 5.7385] |
-| qwen2.5:1.5b-instruct         | one-shot | off     | pooled   | ❌            | ❌           | ❌                 | ❌               | 0.322             | ❌           | **❌**                   | 0.1127 [0.0150, 0.9450] |
-| qwen2.5:1.5b-instruct         | one-shot | off     | sooner_A | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen2.5:1.5b-instruct         | one-shot | off     | sooner_B | ✅            | ✅           | ✅                 | ✅               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0014] |
-| qwen2.5:1.5b-instruct         | one-shot | on      | pooled   | ❌            | ❌           | ❌                 | ❌               | -0.826            | ❌           | **❌**                   | 0.0014 [0.0014, 0.0052] |
-| qwen2.5:1.5b-instruct         | one-shot | on      | sooner_A | ❌            | ❌           | ❌                 | ❌               | -0.508            | ❌           | **❌**                   | 3.1533 [2.4919, 3.1533] |
-| qwen2.5:1.5b-instruct         | one-shot | on      | sooner_B | ❌            | ✅           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0014] |
-| qwen2.5:1.5b-instruct         | two-shot | off     | pooled   | ❌            | ❌           | ❌                 | ❌               | -0.390            | ❌           | **❌**                   | 0.2719 [0.0393, 3.3172] |
-| qwen2.5:1.5b-instruct         | two-shot | off     | sooner_A | ❌            | ❌           | ❌                 | ❌               | -0.862            | ❌           | **❌**                   | 2.5311 [0.1653, 4.6672] |
-| qwen2.5:1.5b-instruct         | two-shot | off     | sooner_B | ❌            | ✅           | ❌                 | ❌               | -4.970            | ❌           | **❌**                   | 0.0493 [0.0052, 0.1089] |
-| qwen2.5:1.5b-instruct         | two-shot | on      | pooled   | ❌            | ❌           | ❌                 | ❌               | -1.258            | ❌           | **❌**                   | 0.0428 [0.0028, 2.0240] |
-| qwen2.5:1.5b-instruct         | two-shot | on      | sooner_A | ❌            | ❌           | ❌                 | ❌               | -0.559            | ❌           | **❌**                   | 0.0017 [0.0014, 0.0321] |
-| qwen2.5:1.5b-instruct         | two-shot | on      | sooner_B | ❌            | ✅           | ❌                 | ❌               | -133.442          | ❌           | **❌**                   | 0.1344 [0.0463, 0.7427] |
-| qwen2.5:3b-instruct           | direct   | off     | pooled   | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen2.5:3b-instruct           | direct   | off     | sooner_A | ✅            | ❌           | ❌                 | ❌               | -0.508            | ❌           | **❌**                   | 3.1533 [3.1533, 5.7385] |
-| qwen2.5:3b-instruct           | direct   | off     | sooner_B | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen2.5:3b-instruct           | direct   | on      | pooled   | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen2.5:3b-instruct           | direct   | on      | sooner_A | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen2.5:3b-instruct           | direct   | on      | sooner_B | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen2.5:3b-instruct           | one-shot | off     | pooled   | ❌            | ✅           | ❌                 | ❌               | -3.457            | ❌           | **❌**                   | 3.5494 [1.6445, 4.4708] |
-| qwen2.5:3b-instruct           | one-shot | off     | sooner_A | ❌            | ✅           | ❌                 | ❌               | -2.971            | ❌           | **❌**                   | 3.8461 [3.8304, 3.8530] |
-| qwen2.5:3b-instruct           | one-shot | off     | sooner_B | ❌            | ✅           | ❌                 | ❌               | -0.966            | ❌           | **❌**                   | 1.4151 [1.2503, 1.6979] |
-| qwen2.5:3b-instruct           | one-shot | on      | pooled   | ❌            | ✅           | ❌                 | ❌               | -3.137            | ❌           | **❌**                   | 4.5154 [2.9625, 5.7385] |
-| qwen2.5:3b-instruct           | one-shot | on      | sooner_A | ❌            | ✅           | ❌                 | ❌               | -0.810            | ❌           | **❌**                   | 5.5064 [5.5051, 5.7385] |
-| qwen2.5:3b-instruct           | one-shot | on      | sooner_B | ✅            | ✅           | ❌                 | ❌               | -5.980            | ❌           | **❌**                   | 3.6562 [3.4287, 3.9872] |
-| qwen2.5:3b-instruct           | two-shot | off     | pooled   | ✅            | ✅           | ❌                 | ❌               | -0.375            | ❌           | **❌**                   | 0.0239 [0.0074, 0.0824] |
-| qwen2.5:3b-instruct           | two-shot | off     | sooner_A | ✅            | ✅           | ✅                 | ✅               | 0.396             | ❌           | **❌**                   | 0.1546 [0.1493, 0.1647] |
-| qwen2.5:3b-instruct           | two-shot | off     | sooner_B | ✅            | ✅           | ❌                 | ❌               | -14.153           | ❌           | **❌**                   | 0.0014 [0.0014, 0.0014] |
-| qwen2.5:3b-instruct           | two-shot | on      | pooled   | ✅            | ✅           | ❌                 | ❌               | 0.504             | ✅           | **❌**                   | 0.0172 [0.0056, 0.0449] |
-| qwen2.5:3b-instruct           | two-shot | on      | sooner_A | ✅            | ✅           | ✅                 | ✅               | 0.469             | ❌           | **❌**                   | 0.1774 [0.1543, 0.2018] |
-| qwen2.5:3b-instruct           | two-shot | on      | sooner_B | ✅            | ✅           | ✅                 | ✅               | -                 | ❌           | **❌**                   | 0.0014 [0.0014, 0.0014] |
-| qwen2.5:7b-instruct           | direct   | off     | pooled   | ❌            | ❌           | ✅                 | ❌               | 0.639             | ✅           | **❌**                   | 1.2393 [1.0245, 5.7385] |
-| qwen2.5:7b-instruct           | direct   | off     | sooner_A | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen2.5:7b-instruct           | direct   | off     | sooner_B | ✅            | ❌           | ✅                 | ❌               | 0.878             | ✅           | **❌**                   | 0.4904 [0.4650, 0.5307] |
-| qwen2.5:7b-instruct           | direct   | on      | pooled   | ❌            | ❌           | ✅                 | ❌               | 0.615             | ✅           | **❌**                   | 1.1923 [0.4801, 5.5265] |
-| qwen2.5:7b-instruct           | direct   | on      | sooner_A | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen2.5:7b-instruct           | direct   | on      | sooner_B | ✅            | ❌           | ❌                 | ❌               | 0.881             | ✅           | **❌**                   | 0.1442 [0.0747, 0.1666] |
-| qwen2.5:7b-instruct           | one-shot | off     | pooled   | ❌            | ✅           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0150, 0.0447] |
-| qwen2.5:7b-instruct           | one-shot | off     | sooner_A | ❌            | ✅           | ✅                 | ❌               | 0.733             | ✅           | **❌**                   | 0.0150 [0.0150, 0.0150] |
-| qwen2.5:7b-instruct           | one-shot | off     | sooner_B | ✅            | ✅           | ✅                 | ✅               | 0.811             | ✅           | **✅**                   | 0.0447 [0.0447, 0.0447] |
-| qwen2.5:7b-instruct           | one-shot | on      | pooled   | ❌            | ✅           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0150, 0.0447] |
-| qwen2.5:7b-instruct           | one-shot | on      | sooner_A | ❌            | ✅           | ✅                 | ❌               | 0.733             | ✅           | **❌**                   | 0.0150 [0.0150, 0.0197] |
-| qwen2.5:7b-instruct           | one-shot | on      | sooner_B | ✅            | ✅           | ✅                 | ✅               | 0.811             | ✅           | **✅**                   | 0.0447 [0.0447, 0.0447] |
-| qwen2.5:7b-instruct           | two-shot | off     | pooled   | ❌            | ❌           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0447, 0.0447] |
-| qwen2.5:7b-instruct           | two-shot | off     | sooner_A | ❌            | ✅           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0447, 0.0447] |
-| qwen2.5:7b-instruct           | two-shot | off     | sooner_B | ✅            | ❌           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0447, 0.0447] |
-| qwen2.5:7b-instruct           | two-shot | on      | pooled   | ❌            | ❌           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0228, 0.0447] |
-| qwen2.5:7b-instruct           | two-shot | on      | sooner_A | ❌            | ✅           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0150, 0.0447] |
-| qwen2.5:7b-instruct           | two-shot | on      | sooner_B | ✅            | ❌           | ✅                 | ❌               | 0.811             | ✅           | **❌**                   | 0.0447 [0.0316, 0.0447] |
-| qwen3:4b-instruct-2507-q4_K_M | direct   | off     | pooled   | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [4.0641, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | direct   | off     | sooner_A | ✅            | ✅           | ❌                 | ❌               | 0.525             | ✅           | **❌**                   | 1.1310 [1.1122, 1.1310] |
-| qwen3:4b-instruct-2507-q4_K_M | direct   | off     | sooner_B | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | direct   | on      | pooled   | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | direct   | on      | sooner_A | ❌            | ✅           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | direct   | on      | sooner_B | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | one-shot | off     | pooled   | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | one-shot | off     | sooner_A | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | one-shot | off     | sooner_B | ✅            | ✅           | ✅                 | ✅               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | one-shot | on      | pooled   | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | one-shot | on      | sooner_A | ✅            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [0.6439, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | one-shot | on      | sooner_B | ✅            | ✅           | ✅                 | ✅               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | two-shot | off     | pooled   | ❌            | ❌           | ❌                 | ❌               | 0.410             | ❌           | **❌**                   | 1.6682 [0.6176, 5.4172] |
-| qwen3:4b-instruct-2507-q4_K_M | two-shot | off     | sooner_A | ✅            | ✅           | ❌                 | ❌               | -10.532           | ❌           | **❌**                   | 5.4172 [5.4172, 5.4172] |
-| qwen3:4b-instruct-2507-q4_K_M | two-shot | off     | sooner_B | ✅            | ❌           | ❌                 | ❌               | 0.674             | ✅           | **❌**                   | 0.6176 [0.6176, 0.6176] |
-| qwen3:4b-instruct-2507-q4_K_M | two-shot | on      | pooled   | ❌            | ❌           | ✅                 | ❌               | -                 | ❌           | **❌**                   | 5.7385 [0.6439, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | two-shot | on      | sooner_A | ✅            | ✅           | ✅                 | ✅               | -                 | ❌           | **❌**                   | 5.7385 [5.7385, 5.7385] |
-| qwen3:4b-instruct-2507-q4_K_M | two-shot | on      | sooner_B | ❌            | ❌           | ✅                 | ❌               | 0.689             | ✅           | **❌**                   | 0.6439 [0.6439, 0.6439] |
-| qwen3:8b                      | direct   | off     | pooled   | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | direct   | off     | sooner_A | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | direct   | off     | sooner_B | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | direct   | on      | pooled   | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | direct   | on      | sooner_A | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | direct   | on      | sooner_B | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | one-shot | off     | pooled   | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | one-shot | off     | sooner_A | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | one-shot | off     | sooner_B | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | one-shot | on      | pooled   | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | one-shot | on      | sooner_A | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | one-shot | on      | sooner_B | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | two-shot | off     | pooled   | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | two-shot | off     | sooner_A | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | two-shot | off     | sooner_B | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | two-shot | on      | pooled   | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | two-shot | on      | sooner_A | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-| qwen3:8b                      | two-shot | on      | sooner_B | ✅            | ❌           | ❌                 | ❌               | -                 | ❌           | **❌**                   | -                       |
-
-
-
+| Model | Mode | Persona | Persona ID | Group | Order | Monotonicity | Money Pref. | Indiff. Non-incr. | Competence Pass | R^2 (indiff. fit) | k Reliable? | **Valid Discount Rate** | Fitted k [95% CI] |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| llama3.1:8b-instruct-q8_0 | direct | off | - | - | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [3.9307, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | off | - | - | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | off | - | - | sooner_B | ❌ | ✅ | ❌ | ❌ | -0.032 | ❌ | **❌** | 0.6145 [0.0711, 5.4913] |
+| llama3.1:8b-instruct-q8_0 | direct | on | substance_use | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [1.2368, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | sugary_food | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [1.7326, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | phone_social_media | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.6375, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | retail_spending | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.7176, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | mindfulness | lesser | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.7176, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [3.1061, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | strategy_games | lesser | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.6145, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | exercise | lesser | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.3478, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | substance_use | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | sugary_food | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [3.5596, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | phone_social_media | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.4058, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | retail_spending | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [3.1061, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | mindfulness | lesser | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.5310, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | strategy_games | lesser | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [4.4095, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | exercise | lesser | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| llama3.1:8b-instruct-q8_0 | direct | on | substance_use | greater | sooner_B | ❌ | ✅ | ❌ | ❌ | -0.416 | ❌ | **❌** | 0.0216 [0.0015, 0.2557] |
+| llama3.1:8b-instruct-q8_0 | direct | on | sugary_food | greater | sooner_B | ❌ | ❌ | ❌ | ❌ | -0.574 | ❌ | **❌** | 0.0075 [0.0062, 4.6882] |
+| llama3.1:8b-instruct-q8_0 | direct | on | phone_social_media | greater | sooner_B | ❌ | ❌ | ❌ | ❌ | 0.228 | ❌ | **❌** | 0.1656 [0.0098, 0.6375] |
+| llama3.1:8b-instruct-q8_0 | direct | on | retail_spending | greater | sooner_B | ❌ | ✅ | ❌ | ❌ | -0.145 | ❌ | **❌** | 0.2158 [0.0089, 4.6882] |
+| llama3.1:8b-instruct-q8_0 | direct | on | mindfulness | lesser | sooner_B | ❌ | ❌ | ❌ | ❌ | -0.208 | ❌ | **❌** | 0.0697 [0.0160, 1.7326] |
+| llama3.1:8b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ❌ | ❌ | ❌ | ❌ | -0.130 | ❌ | **❌** | 0.0265 [0.0240, 4.9877] |
+| llama3.1:8b-instruct-q8_0 | direct | on | strategy_games | lesser | sooner_B | ❌ | ❌ | ❌ | ❌ | -0.067 | ❌ | **❌** | 0.0729 [0.0095, 2.4910] |
+| llama3.1:8b-instruct-q8_0 | direct | on | exercise | lesser | sooner_B | ❌ | ❌ | ❌ | ❌ | -0.500 | ❌ | **❌** | 0.0020 [0.0015, 0.1960] |
+| mistral:7b-instruct-q8_0 | direct | off | - | - | pooled | ❌ | ❌ | ❌ | ❌ | -0.480 | ❌ | **❌** | 2.2931 [0.0162, 5.0379] |
+| mistral:7b-instruct-q8_0 | direct | off | - | - | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | off | - | - | sooner_B | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0089] |
+| mistral:7b-instruct-q8_0 | direct | on | substance_use | greater | pooled | ❌ | ❌ | ✅ | ❌ | -2.870 | ❌ | **❌** | 3.1918 [0.3301, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | sugary_food | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [2.7248, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | phone_social_media | greater | pooled | ❌ | ❌ | ❌ | ❌ | -0.388 | ❌ | **❌** | 1.7326 [0.1459, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | retail_spending | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.1656, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | mindfulness | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.172 | ❌ | **❌** | 0.0682 [0.0036, 3.8647] |
+| mistral:7b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.509 | ❌ | **❌** | 0.1518 [0.0279, 4.6644] |
+| mistral:7b-instruct-q8_0 | direct | on | strategy_games | lesser | pooled | ❌ | ❌ | ❌ | ❌ | 0.729 | ✅ | **❌** | 1.0009 [0.0042, 4.9838] |
+| mistral:7b-instruct-q8_0 | direct | on | exercise | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.692 | ❌ | **❌** | 3.8823 [0.0256, 5.5161] |
+| mistral:7b-instruct-q8_0 | direct | on | substance_use | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.3064, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | sugary_food | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [1.5373, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | phone_social_media | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | retail_spending | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | mindfulness | lesser | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [1.7326, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.2980, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | strategy_games | lesser | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [4.2836, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | exercise | lesser | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [4.8484, 5.6511] |
+| mistral:7b-instruct-q8_0 | direct | on | substance_use | greater | sooner_B | ❌ | ❌ | ❌ | ❌ | 0.279 | ❌ | **❌** | 0.0541 [0.0043, 0.3691] |
+| mistral:7b-instruct-q8_0 | direct | on | sugary_food | greater | sooner_B | ❌ | ❌ | ❌ | ❌ | -1.592 | ❌ | **❌** | 0.0067 [0.0021, 4.9877] |
+| mistral:7b-instruct-q8_0 | direct | on | phone_social_media | greater | sooner_B | ❌ | ❌ | ❌ | ❌ | -0.479 | ❌ | **❌** | 0.0256 [0.0018, 0.1483] |
+| mistral:7b-instruct-q8_0 | direct | on | retail_spending | greater | sooner_B | ❌ | ❌ | ❌ | ❌ | -0.987 | ❌ | **❌** | 0.0024 [0.0015, 0.0251] |
+| mistral:7b-instruct-q8_0 | direct | on | mindfulness | lesser | sooner_B | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0089] |
+| mistral:7b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0108] |
+| mistral:7b-instruct-q8_0 | direct | on | strategy_games | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0020] |
+| mistral:7b-instruct-q8_0 | direct | on | exercise | lesser | sooner_B | ❌ | ✅ | ❌ | ❌ | -0.740 | ❌ | **❌** | 0.0028 [0.0015, 0.0178] |
+| qwen2.5:7b-instruct-q8_0 | direct | off | - | - | pooled | ❌ | ❌ | ❌ | ❌ | -2.262 | ❌ | **❌** | 2.6214 [0.4610, 3.2934] |
+| qwen2.5:7b-instruct-q8_0 | direct | off | - | - | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | off | - | - | sooner_B | ✅ | ❌ | ✅ | ❌ | 0.970 | ✅ | **❌** | 0.1443 [0.1349, 0.1487] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | substance_use | greater | pooled | ❌ | ❌ | ❌ | ❌ | -1.654 | ❌ | **❌** | 2.6677 [0.9737, 3.3816] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | sugary_food | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | phone_social_media | greater | pooled | ❌ | ❌ | ❌ | ❌ | -1.503 | ❌ | **❌** | 2.7434 [1.0327, 3.4508] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | retail_spending | greater | pooled | ❌ | ❌ | ❌ | ❌ | -0.432 | ❌ | **❌** | 1.8029 [0.4797, 3.2861] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | mindfulness | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.327 | ❌ | **❌** | 0.0627 [0.0246, 1.0437] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.407 | ❌ | **❌** | 0.1186 [0.0515, 1.9256] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | strategy_games | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.199 | ❌ | **❌** | 0.0863 [0.0540, 1.3590] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | exercise | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.797 | ❌ | **❌** | 1.6332 [0.4246, 2.2430] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | substance_use | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | sugary_food | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | phone_social_media | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | retail_spending | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [4.8911, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | mindfulness | lesser | sooner_A | ✅ | ❌ | ❌ | ❌ | -12.058 | ❌ | **❌** | 4.1345 [4.0643, 4.2607] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | strategy_games | lesser | sooner_A | ✅ | ❌ | ❌ | ❌ | -195.477 | ❌ | **❌** | 5.3931 [4.6686, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | exercise | lesser | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [4.9655, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | substance_use | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | 0.901 | ✅ | **❌** | 0.3444 [0.2204, 0.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | sugary_food | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | phone_social_media | greater | sooner_B | ❌ | ❌ | ✅ | ❌ | 0.952 | ✅ | **❌** | 0.4579 [0.2039, 0.6393] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | retail_spending | greater | sooner_B | ❌ | ❌ | ✅ | ❌ | 0.788 | ✅ | **❌** | 0.1102 [0.0895, 0.2493] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | mindfulness | lesser | sooner_B | ✅ | ✅ | ✅ | ✅ | 0.556 | ✅ | **✅** | 0.0098 [0.0098, 0.0221] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | 0.763 | ✅ | **❌** | 0.0165 [0.0146, 0.0267] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | strategy_games | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | 0.909 | ✅ | **❌** | 0.0361 [0.0206, 0.0385] |
+| qwen2.5:7b-instruct-q8_0 | direct | on | exercise | lesser | sooner_B | ❌ | ❌ | ✅ | ❌ | 0.830 | ✅ | **❌** | 0.1005 [0.0957, 0.2055] |
+| qwen3.5:27b-q8_0 | direct | off | - | - | pooled | ❌ | ✅ | ❌ | ❌ | 0.886 | ✅ | **❌** | 0.0216 [0.0101, 0.0349] |
+| qwen3.5:27b-q8_0 | direct | off | - | - | sooner_A | ❌ | ✅ | ✅ | ❌ | 0.896 | ✅ | **❌** | 0.0104 [0.0076, 0.0172] |
+| qwen3.5:27b-q8_0 | direct | off | - | - | sooner_B | ❌ | ✅ | ❌ | ❌ | 0.869 | ✅ | **❌** | 0.0372 [0.0223, 0.1559] |
+| qwen3.5:27b-q8_0 | direct | on | substance_use | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | sugary_food | greater | pooled | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | phone_social_media | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | retail_spending | greater | pooled | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | mindfulness | lesser | pooled | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0024] |
+| qwen3.5:27b-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0015] |
+| qwen3.5:27b-q8_0 | direct | on | strategy_games | lesser | pooled | ❌ | ✅ | ✅ | ❌ | 0.549 | ✅ | **❌** | 0.0048 [0.0015, 0.0055] |
+| qwen3.5:27b-q8_0 | direct | on | exercise | lesser | pooled | ❌ | ✅ | ✅ | ❌ | 0.056 | ❌ | **❌** | 0.0032 [0.0026, 0.0129] |
+| qwen3.5:27b-q8_0 | direct | on | substance_use | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | sugary_food | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | phone_social_media | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | retail_spending | greater | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | mindfulness | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | 0.388 | ❌ | **❌** | 0.0043 [0.0028, 0.0079] |
+| qwen3.5:27b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ✅ | ✅ | ✅ | ✅ | -7.085 | ❌ | **❌** | 0.0021 [0.0015, 0.0032] |
+| qwen3.5:27b-q8_0 | direct | on | strategy_games | lesser | sooner_A | ✅ | ✅ | ✅ | ✅ | 0.760 | ✅ | **✅** | 0.0072 [0.0059, 0.0102] |
+| qwen3.5:27b-q8_0 | direct | on | exercise | lesser | sooner_A | ✅ | ✅ | ❌ | ❌ | 0.757 | ✅ | **❌** | 0.0097 [0.0052, 0.0219] |
+| qwen3.5:27b-q8_0 | direct | on | substance_use | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | sugary_food | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | phone_social_media | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | retail_spending | greater | sooner_B | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:27b-q8_0 | direct | on | mindfulness | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0015] |
+| qwen3.5:27b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0015] |
+| qwen3.5:27b-q8_0 | direct | on | strategy_games | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0015] |
+| qwen3.5:27b-q8_0 | direct | on | exercise | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | 0.595 | ✅ | **❌** | 0.0069 [0.0015, 0.0113] |
+| qwen3.5:35b-a3b-q8_0 | direct | off | - | - | pooled | ❌ | ✅ | ❌ | ❌ | -1.523 | ❌ | **❌** | 4.4792 [0.5036, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | off | - | - | sooner_A | ❌ | ✅ | ✅ | ❌ | 0.923 | ✅ | **❌** | 0.0208 [0.0130, 0.0330] |
+| qwen3.5:35b-a3b-q8_0 | direct | off | - | - | sooner_B | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | substance_use | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | sugary_food | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | phone_social_media | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | retail_spending | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | mindfulness | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.051 | ❌ | **❌** | 0.0908 [0.0196, 1.3384] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ❌ | ✅ | ❌ | ❌ | -0.715 | ❌ | **❌** | 0.6193 [0.1376, 2.2833] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | strategy_games | lesser | pooled | ❌ | ✅ | ❌ | ❌ | -1.293 | ❌ | **❌** | 0.9238 [0.0601, 3.3571] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | exercise | lesser | pooled | ❌ | ✅ | ❌ | ❌ | -4.125 | ❌ | **❌** | 4.4103 [0.4081, 5.6217] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | substance_use | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | sugary_food | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | phone_social_media | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [4.5985, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | retail_spending | greater | sooner_A | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6377, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | mindfulness | lesser | sooner_A | ❌ | ❌ | ❌ | ❌ | 0.002 | ❌ | **❌** | 0.0074 [0.0015, 0.0177] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | 0.385 | ❌ | **❌** | 0.0329 [0.0121, 0.4335] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | strategy_games | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | 0.853 | ✅ | **❌** | 0.0174 [0.0094, 0.0280] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | exercise | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | 0.317 | ❌ | **❌** | 0.0258 [0.0132, 0.1560] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | substance_use | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | sugary_food | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | phone_social_media | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | retail_spending | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | mindfulness | lesser | sooner_B | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.6371, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | 0.703 | ✅ | **❌** | 1.3054 [0.3297, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | strategy_games | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.6375, 5.6511] |
+| qwen3.5:35b-a3b-q8_0 | direct | on | exercise | lesser | sooner_B | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [4.8006, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | off | - | - | pooled | ❌ | ✅ | ❌ | ❌ | -2.229 | ❌ | **❌** | 4.3999 [2.8981, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | off | - | - | sooner_A | ❌ | ✅ | ❌ | ❌ | 0.702 | ✅ | **❌** | 0.2162 [0.1400, 0.5430] |
+| qwen3.5:9b-q8_0 | direct | off | - | - | sooner_B | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | on | substance_use | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.3478, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | on | sugary_food | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.7176, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | on | phone_social_media | greater | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [3.1565, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | on | retail_spending | greater | pooled | ❌ | ✅ | ❌ | ❌ | -0.689 | ❌ | **❌** | 0.0205 [0.0020, 2.5175] |
+| qwen3.5:9b-q8_0 | direct | on | mindfulness | lesser | pooled | ❌ | ✅ | ❌ | ❌ | -0.668 | ❌ | **❌** | 0.0071 [0.0016, 0.0248] |
+| qwen3.5:9b-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ❌ | ✅ | ❌ | ❌ | -0.760 | ❌ | **❌** | 1.0014 [0.0108, 3.9500] |
+| qwen3.5:9b-q8_0 | direct | on | strategy_games | lesser | pooled | ❌ | ✅ | ❌ | ❌ | -1.168 | ❌ | **❌** | 0.0083 [0.0025, 0.0826] |
+| qwen3.5:9b-q8_0 | direct | on | exercise | lesser | pooled | ❌ | ✅ | ❌ | ❌ | -0.822 | ❌ | **❌** | 0.6839 [0.0160, 3.1719] |
+| qwen3.5:9b-q8_0 | direct | on | substance_use | greater | sooner_A | ❌ | ✅ | ❌ | ❌ | -0.552 | ❌ | **❌** | 0.2624 [0.0084, 2.2516] |
+| qwen3.5:9b-q8_0 | direct | on | sugary_food | greater | sooner_A | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.0945, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | on | phone_social_media | greater | sooner_A | ❌ | ✅ | ❌ | ❌ | -0.895 | ❌ | **❌** | 3.1630 [0.0031, 4.4946] |
+| qwen3.5:9b-q8_0 | direct | on | retail_spending | greater | sooner_A | ❌ | ✅ | ❌ | ❌ | -0.286 | ❌ | **❌** | 0.0825 [0.0031, 0.2028] |
+| qwen3.5:9b-q8_0 | direct | on | mindfulness | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | -1.621 | ❌ | **❌** | 0.0475 [0.0023, 0.8178] |
+| qwen3.5:9b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | 0.400 | ❌ | **❌** | 0.8799 [0.1039, 5.2618] |
+| qwen3.5:9b-q8_0 | direct | on | strategy_games | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | -1.150 | ❌ | **❌** | 0.0179 [0.0095, 1.0802] |
+| qwen3.5:9b-q8_0 | direct | on | exercise | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | -0.728 | ❌ | **❌** | 0.2364 [0.0087, 1.3443] |
+| qwen3.5:9b-q8_0 | direct | on | substance_use | greater | sooner_B | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.6375, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | on | sugary_food | greater | sooner_B | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.7176, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | on | phone_social_media | greater | sooner_B | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.7176, 5.6511] |
+| qwen3.5:9b-q8_0 | direct | on | retail_spending | greater | sooner_B | ❌ | ❌ | ❌ | ❌ | -1.239 | ❌ | **❌** | 0.0164 [0.0021, 4.9004] |
+| qwen3.5:9b-q8_0 | direct | on | mindfulness | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | 0.583 | ✅ | **❌** | 0.0055 [0.0015, 0.0167] |
+| qwen3.5:9b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ❌ | ✅ | ❌ | ❌ | -1.279 | ❌ | **❌** | 0.0201 [0.0017, 0.6950] |
+| qwen3.5:9b-q8_0 | direct | on | strategy_games | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | -10.126 | ❌ | **❌** | 0.0020 [0.0015, 0.0732] |
+| qwen3.5:9b-q8_0 | direct | on | exercise | lesser | sooner_B | ❌ | ❌ | ❌ | ❌ | -0.477 | ❌ | **❌** | 0.1301 [0.0036, 1.9350] |
+| qwen3:32b-q8_0 | direct | off | - | - | pooled | ❌ | ✅ | ❌ | ❌ | 0.931 | ✅ | **❌** | 0.0252 [0.0203, 0.0277] |
+| qwen3:32b-q8_0 | direct | off | - | - | sooner_A | ❌ | ✅ | ❌ | ❌ | 0.940 | ✅ | **❌** | 0.0412 [0.0375, 0.0658] |
+| qwen3:32b-q8_0 | direct | off | - | - | sooner_B | ❌ | ✅ | ✅ | ❌ | 0.587 | ✅ | **❌** | 0.0056 [0.0055, 0.0173] |
+| qwen3:32b-q8_0 | direct | on | substance_use | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | sugary_food | greater | pooled | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | phone_social_media | greater | pooled | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | retail_spending | greater | pooled | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | mindfulness | lesser | pooled | ❌ | ✅ | ✅ | ❌ | 0.556 | ✅ | **❌** | 0.0098 [0.0098, 0.0160] |
+| qwen3:32b-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ❌ | ✅ | ❌ | ❌ | 0.294 | ❌ | **❌** | 0.0751 [0.0304, 0.5938] |
+| qwen3:32b-q8_0 | direct | on | strategy_games | lesser | pooled | ✅ | ✅ | ✅ | ✅ | -7.903 | ❌ | **❌** | 0.0020 [0.0015, 0.0034] |
+| qwen3:32b-q8_0 | direct | on | exercise | lesser | pooled | ❌ | ✅ | ❌ | ❌ | -0.113 | ❌ | **❌** | 0.0147 [0.0098, 0.0825] |
+| qwen3:32b-q8_0 | direct | on | substance_use | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | sugary_food | greater | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | phone_social_media | greater | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | retail_spending | greater | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | mindfulness | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | 0.816 | ✅ | **❌** | 0.0269 [0.0216, 0.0828] |
+| qwen3:32b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [0.6375, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | strategy_games | lesser | sooner_A | ✅ | ❌ | ✅ | ❌ | 0.486 | ❌ | **❌** | 0.0048 [0.0038, 0.0058] |
+| qwen3:32b-q8_0 | direct | on | exercise | lesser | sooner_A | ❌ | ✅ | ✅ | ❌ | 0.688 | ✅ | **❌** | 0.6375 [0.6108, 0.6375] |
+| qwen3:32b-q8_0 | direct | on | substance_use | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | sugary_food | greater | sooner_B | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | phone_social_media | greater | sooner_B | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | retail_spending | greater | sooner_B | ❌ | ✅ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:32b-q8_0 | direct | on | mindfulness | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | 0.556 | ✅ | **❌** | 0.0098 [0.0098, 0.0098] |
+| qwen3:32b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | 0.556 | ✅ | **❌** | 0.0098 [0.0056, 0.0104] |
+| qwen3:32b-q8_0 | direct | on | strategy_games | lesser | sooner_B | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 0.0015 [0.0015, 0.0015] |
+| qwen3:32b-q8_0 | direct | on | exercise | lesser | sooner_B | ❌ | ✅ | ✅ | ❌ | 0.556 | ✅ | **❌** | 0.0098 [0.0098, 0.0098] |
+| qwen3:4b-instruct-2507-q8_0 | direct | off | - | - | pooled | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | off | - | - | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | off | - | - | sooner_B | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [3.1061, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | substance_use | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | sugary_food | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | phone_social_media | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | retail_spending | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | mindfulness | lesser | pooled | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | strategy_games | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -0.388 | ❌ | **❌** | 1.7326 [0.1617, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | exercise | lesser | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | substance_use | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | sugary_food | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | phone_social_media | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | retail_spending | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | mindfulness | lesser | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | strategy_games | lesser | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | exercise | lesser | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | substance_use | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | sugary_food | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | phone_social_media | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | retail_spending | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | mindfulness | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | 0.688 | ✅ | **❌** | 0.6375 [0.2493, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | strategy_games | lesser | sooner_B | ❌ | ❌ | ✅ | ❌ | 0.788 | ✅ | **❌** | 0.1102 [0.1102, 0.1102] |
+| qwen3:4b-instruct-2507-q8_0 | direct | on | exercise | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | off | - | - | pooled | ❌ | ❌ | ❌ | ❌ | -6.681 | ❌ | **❌** | 5.2091 [2.0211, 5.6101] |
+| qwen3:8b-q8_0 | direct | off | - | - | sooner_A | ✅ | ❌ | ❌ | ❌ | -16.355 | ❌ | **❌** | 0.0041 [0.0039, 0.0048] |
+| qwen3:8b-q8_0 | direct | off | - | - | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | substance_use | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | sugary_food | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | phone_social_media | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | retail_spending | greater | pooled | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | mindfulness | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -6.736 | ❌ | **❌** | 5.0513 [1.6166, 5.6101] |
+| qwen3:8b-q8_0 | direct | on | no_smoking_drinking | lesser | pooled | ❌ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | strategy_games | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -6.736 | ❌ | **❌** | 5.0513 [1.6081, 5.6101] |
+| qwen3:8b-q8_0 | direct | on | exercise | lesser | pooled | ❌ | ❌ | ❌ | ❌ | -344.765 | ❌ | **❌** | 5.4560 [4.6891, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | substance_use | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | sugary_food | greater | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | phone_social_media | greater | sooner_A | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | retail_spending | greater | sooner_A | ✅ | ✅ | ✅ | ✅ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | mindfulness | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | -10.720 | ❌ | **❌** | 0.0044 [0.0042, 0.0050] |
+| qwen3:8b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | -23.028 | ❌ | **❌** | 5.4281 [4.2989, 5.6049] |
+| qwen3:8b-q8_0 | direct | on | strategy_games | lesser | sooner_A | ✅ | ✅ | ❌ | ❌ | -26.155 | ❌ | **❌** | 0.0079 [0.0068, 0.0089] |
+| qwen3:8b-q8_0 | direct | on | exercise | lesser | sooner_A | ❌ | ✅ | ❌ | ❌ | -1.235 | ❌ | **❌** | 2.1293 [0.7089, 2.3123] |
+| qwen3:8b-q8_0 | direct | on | substance_use | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | sugary_food | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | phone_social_media | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | retail_spending | greater | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | mindfulness | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | no_smoking_drinking | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | strategy_games | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
+| qwen3:8b-q8_0 | direct | on | exercise | lesser | sooner_B | ✅ | ❌ | ✅ | ❌ | - | ❌ | **❌** | 5.6511 [5.6511, 5.6511] |
 
 ## Column definitions
 
@@ -150,6 +263,5 @@ Results stratified by A/B option order (pooled / sooner_A / sooner_B).
 - **k Reliable?**: R^2 above threshold, enough indifference points, AND fitted k did not land at the optimizer's boundary ([1e-06, 10.0]). Bound hits are cut from reliability; the bound values themselves are still reported.
 - **Valid Discount Rate**: Competence Pass AND k Reliable — the single bottom-line flag for whether the fitted k should be trusted at all.
 - **Fitted k [95% CI]**: hyperbolic discount rate per month with bootstrap 95% CI, shown regardless of reliability (compare against the "k Reliable?"/"Valid Discount Rate" columns before interpreting).
-- **Persona**: on/off demographic persona framing; demographic strata (gender, age band) are in `by_demographics.csv` / `comparison_summary_by_demographics*.csv` when persona-on data exists.
+- **Persona**: on/off behavioral persona framing; per-persona and greater/lesser discounting-group strata are in `by_persona.csv` / `comparison_summary_by_persona*.csv` when persona-on data exists.
 - **Order**: `pooled` / `sooner_A` / `sooner_B` — whether the sooner option was listed as A or B (or all trials pooled).
-

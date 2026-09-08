@@ -8,7 +8,7 @@ $0 cells excluded). Larger-later = not choosing the sooner option.
 
 Usage:
   python src/plot_p_later_by_delay.py [--config path/to/config.yaml]
-                                      [--mode direct|cot|one_shot|two_shot]
+                                      [--mode direct|cot]
                                       [--all-modes]
 """
 
@@ -28,8 +28,6 @@ from run_experiment import REASONING_MODES
 MODE_DISPLAY_LABELS = {
     "direct": "direct",
     "cot": "chain-of-thought",
-    "one_shot": "one-shot",
-    "two_shot": "two-shot",
 }
 
 PERSONA_SERIES = [

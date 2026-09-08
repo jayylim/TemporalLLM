@@ -9,7 +9,7 @@ rises, LDR requires less personal patience to justify, so a rational agent's
 P(choose LDR) should rise, not fall); this is exactly what
 competence_checks.check_rank_monotonicity tests numerically.
 
-Usage: python src/plot_choice_curves.py [--config path/to/config.yaml] [--mode direct|cot|one_shot|two_shot]
+Usage: python src/plot_choice_curves.py [--config path/to/config.yaml] [--mode direct|cot]
 """
 
 import argparse

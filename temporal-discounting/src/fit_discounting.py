@@ -35,6 +35,7 @@ from config_utils import (
     result_suffix,
     persona_enabled_from_config,
 )
+from persona import iter_persona_groups
 from run_experiment import REASONING_MODES
 
 BOUNDARY_RELATIVE_TOLERANCE = 1e-3
@@ -231,57 +232,67 @@ def main():
             print(f"[{model_name}] no parsed choices found, skipping fit.")
             continue
 
-        for option_order, sooner_is_a in OPTION_ORDER_STRATA:
-            stratum_df = filter_by_option_order(model_choices_df, sooner_is_a)
-            if stratum_df.empty:
-                print(f"[{model_name} / {option_order}] no trials, skipping fit.")
-                continue
+        for persona_id, discounting_group, persona_label, persona_df in iter_persona_groups(
+            model_choices_df
+        ):
+            persona_tag = f" / {persona_id}" if persona_id is not None else ""
+            for option_order, sooner_is_a in OPTION_ORDER_STRATA:
+                stratum_df = filter_by_option_order(persona_df, sooner_is_a)
+                if stratum_df.empty:
+                    print(f"[{model_name}{persona_tag} / {option_order}] no trials, skipping fit.")
+                    continue
 
-            fit_result = fit_discounting_for_model(
-                stratum_df, later_amount_dollars, n_bootstrap, bootstrap_seed,
-                fitting_bounds, delay_grid_months,
-            )
-            indifference_df = fit_result.pop("indifference_points")
-            for _, point in indifference_df.iterrows():
-                indifference_rows.append({
-                    "model_name": model_name,
-                    "persona_enabled": persona_enabled,
-                    "option_order": option_order,
-                    "delay_months": point["delay_months"],
-                    "indifference_amount": point["indifference_amount"],
-                    "p_sooner_min": point["p_sooner_min"],
-                    "p_sooner_max": point["p_sooner_max"],
-                })
+                fit_result = fit_discounting_for_model(
+                    stratum_df, later_amount_dollars, n_bootstrap, bootstrap_seed,
+                    fitting_bounds, delay_grid_months,
+                )
+                indifference_df = fit_result.pop("indifference_points")
+                for _, point in indifference_df.iterrows():
+                    indifference_rows.append({
+                        "model_name": model_name,
+                        "persona_enabled": persona_enabled,
+                        "persona_id": persona_id,
+                        "persona_label": persona_label,
+                        "persona_discounting_group": discounting_group,
+                        "option_order": option_order,
+                        "delay_months": point["delay_months"],
+                        "indifference_amount": point["indifference_amount"],
+                        "p_sooner_min": point["p_sooner_min"],
+                        "p_sooner_max": point["p_sooner_max"],
+                    })
 
-            reliability_note = (
-                "" if fit_result["k_is_reliable"]
-                else "  [UNRELIABLE: k at bound, poor R^2, or too few indifference points]"
-            )
-            r2_str = "nan" if np.isnan(fit_result["r_squared"]) else f"{fit_result['r_squared']:.3f}"
-            k_str = "nan" if np.isnan(fit_result["k"]) else f"{fit_result['k']:.5f}"
-            ci_lo = fit_result["k_ci_low"]
-            ci_hi = fit_result["k_ci_high"]
-            ci_str = (
-                f"[{ci_lo:.5f}, {ci_hi:.5f}]"
-                if not (np.isnan(ci_lo) or np.isnan(ci_hi)) else "[nan, nan]"
-            )
-            print(f"[{model_name} / {option_order}] k={k_str} 95% CI={ci_str} "
-                  f"R^2={r2_str} (n_points={fit_result['n_indifference_points']}, "
-                  f"n_trials={fit_result['n_trials_fit']}) "
-                  f"bounds=[{fit_result['k_lower_bound']}, {fit_result['k_upper_bound']}]"
-                  f"{reliability_note}")
-            print(f"  indifference amounts: "
-                  + ", ".join(
-                      f"d={row['delay_months']:g}->${row['indifference_amount']:.1f}"
-                      for _, row in indifference_df.iterrows()
-                  ))
+                reliability_note = (
+                    "" if fit_result["k_is_reliable"]
+                    else "  [UNRELIABLE: k at bound, poor R^2, or too few indifference points]"
+                )
+                r2_str = "nan" if np.isnan(fit_result["r_squared"]) else f"{fit_result['r_squared']:.3f}"
+                k_str = "nan" if np.isnan(fit_result["k"]) else f"{fit_result['k']:.5f}"
+                ci_lo = fit_result["k_ci_low"]
+                ci_hi = fit_result["k_ci_high"]
+                ci_str = (
+                    f"[{ci_lo:.5f}, {ci_hi:.5f}]"
+                    if not (np.isnan(ci_lo) or np.isnan(ci_hi)) else "[nan, nan]"
+                )
+                print(f"[{model_name}{persona_tag} / {option_order}] k={k_str} 95% CI={ci_str} "
+                      f"R^2={r2_str} (n_points={fit_result['n_indifference_points']}, "
+                      f"n_trials={fit_result['n_trials_fit']}) "
+                      f"bounds=[{fit_result['k_lower_bound']}, {fit_result['k_upper_bound']}]"
+                      f"{reliability_note}")
+                print(f"  indifference amounts: "
+                      + ", ".join(
+                          f"d={row['delay_months']:g}->${row['indifference_amount']:.1f}"
+                          for _, row in indifference_df.iterrows()
+                      ))
 
-            fit_rows.append(dict(
-                model_name=model_name,
-                persona_enabled=persona_enabled,
-                option_order=option_order,
-                **fit_result,
-            ))
+                fit_rows.append(dict(
+                    model_name=model_name,
+                    persona_enabled=persona_enabled,
+                    persona_id=persona_id,
+                    persona_label=persona_label,
+                    persona_discounting_group=discounting_group,
+                    option_order=option_order,
+                    **fit_result,
+                ))
 
     fit_df = pd.DataFrame(fit_rows)
     fit_csv_path = os.path.join(tables_dir, f"discount_rates{suffix}.csv")

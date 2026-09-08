@@ -3,7 +3,7 @@ comparison table, and plots normalized hyperbolic discount curves (fraction
 of value retained vs delay) against an approximate Kirby-27 human benchmark.
 Kirby analogue of ../temporal-discounting/src/analyze.py.
 
-Usage: python src/analyze.py [--config path/to/config.yaml] [--mode direct|cot|one_shot|two_shot]
+Usage: python src/analyze.py [--config path/to/config.yaml] [--mode direct|cot]
 """
 
 import argparse
@@ -24,8 +24,6 @@ MODEL_COLORS = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"]
 MODE_DISPLAY_LABELS = {
     "direct": "direct",
     "cot": "chain-of-thought",
-    "one_shot": "one-shot",
-    "two_shot": "two-shot",
 }
 
 

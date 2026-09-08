@@ -3,15 +3,12 @@ every raw completion incrementally so the run is resumable after interruption.
 
 Structurally identical to ../temporal-discounting/src/run_experiment.py, just
 pointed at the Kirby MCQ-27 item set (kirby_game.py) instead of the Waiting
-Game's synthetic grid. Supports the same four reasoning modes (--mode):
+Game's synthetic grid. Supports the same two reasoning modes (--mode):
   direct:    minimal-instruction, single-letter-response prompt.
   cot:       chain-of-thought prompt requiring step-by-step reasoning before
              a "FINAL ANSWER: A/B" line.
-  one_shot:  direct-style prompt preceded by 1 worked example (see
-             kirby_game.build_few_shot_messages_for_mode).
-  two_shot:  direct-style prompt preceded by 2 worked examples.
 
-Usage: python src/run_experiment.py [--config path/to/config.yaml] [--mode direct|cot|one_shot|two_shot]
+Usage: python src/run_experiment.py [--config path/to/config.yaml] [--mode direct|cot]
 """
 
 import argparse
@@ -23,15 +20,13 @@ from tqdm import tqdm
 
 from config_utils import load_config, load_kirby_items, resolve_dir_path, mode_suffix, variant_suffix
 from ollama_client import OllamaClient
-from kirby_game import build_all_trials, build_few_shot_messages_for_mode
+from kirby_game import build_all_trials
 
-REASONING_MODES = ["direct", "cot", "one_shot", "two_shot"]
+REASONING_MODES = ["direct", "cot"]
 
 PROMPT_CONFIG_KEYS_BY_MODE = {
     "direct": ("system_prompt", "num_predict"),
     "cot": ("cot_system_prompt", "cot_num_predict"),
-    "one_shot": ("system_prompt", "num_predict"),
-    "two_shot": ("system_prompt", "num_predict"),
 }
 
 
@@ -61,9 +56,7 @@ def load_completed_trial_ids(raw_jsonl_path):
 
 
 def run_experiment_for_model(model_name, all_trials, system_prompt, temperature, num_predict,
-                              keep_alive, reasoning_mode, ollama_client, raw_jsonl_path,
-                              few_shot_messages=None):
-    few_shot_messages = few_shot_messages or []
+                              keep_alive, reasoning_mode, ollama_client, raw_jsonl_path):
     completed_trial_ids = load_completed_trial_ids(raw_jsonl_path)
     pending_trials = [t for t in all_trials if t["trial_id"] not in completed_trial_ids]
 
@@ -72,24 +65,14 @@ def run_experiment_for_model(model_name, all_trials, system_prompt, temperature,
 
     with open(raw_jsonl_path, "a") as raw_file:
         for trial in tqdm(pending_trials, desc=f"{model_name} [{reasoning_mode}]"):
-            if few_shot_messages:
-                raw_response_text = ollama_client.chat(
-                    model_name=model_name,
-                    system_prompt=system_prompt,
-                    messages=few_shot_messages + [{"role": "user", "content": trial["user_prompt"]}],
-                    temperature=temperature,
-                    num_predict=num_predict,
-                    keep_alive=keep_alive,
-                )
-            else:
-                raw_response_text = ollama_client.generate(
-                    model_name=model_name,
-                    system_prompt=system_prompt,
-                    user_prompt=trial["user_prompt"],
-                    temperature=temperature,
-                    num_predict=num_predict,
-                    keep_alive=keep_alive,
-                )
+            raw_response_text = ollama_client.generate(
+                model_name=model_name,
+                system_prompt=system_prompt,
+                user_prompt=trial["user_prompt"],
+                temperature=temperature,
+                num_predict=num_predict,
+                keep_alive=keep_alive,
+            )
 
             logged_record = dict(trial)  # copy trial fields (prompt, order, ids)
             logged_record["model_name"] = model_name
@@ -105,8 +88,7 @@ def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
     arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct",
-                             help="direct: minimal single-letter prompt. cot: chain-of-thought prompt. "
-                                  "one_shot/two_shot: direct-style prompt preceded by worked examples.")
+                             help="direct: minimal single-letter prompt. cot: chain-of-thought prompt.")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
@@ -119,10 +101,6 @@ def main():
     num_predict = kirby_config[num_predict_key]
     temperature = kirby_config["temperature"]
     keep_alive = ollama_config["keep_alive"]
-
-    few_shot_messages = build_few_shot_messages_for_mode(kirby_config, args.mode)
-    if few_shot_messages:
-        print(f"Mode = {args.mode}: prepending {len(few_shot_messages) // 2} worked example(s) to every trial.")
 
     ollama_client = OllamaClient(
         base_url=ollama_config["base_url"],
@@ -155,7 +133,6 @@ def main():
             reasoning_mode=args.mode,
             ollama_client=ollama_client,
             raw_jsonl_path=raw_jsonl_path,
-            few_shot_messages=few_shot_messages,
         )
 
         is_last_model = model_index == len(model_names) - 1

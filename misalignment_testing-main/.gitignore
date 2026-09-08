@@ -1,0 +1,7 @@
+.env
+.venv-web
+outputs
+outputs_**
+cai_datasets
+*/__pycache__
+web_app

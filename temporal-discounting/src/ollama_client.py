@@ -26,6 +26,8 @@ class OllamaClient:
             "prompt": user_prompt,
             "stream": False,
             "keep_alive": keep_alive,
+            # Top-level (not options): disables thinking for qwen3 / qwen3.5 hybrid models.
+            "think": False,
             "options": {
                 "temperature": temperature,
                 "num_predict": num_predict,
@@ -43,45 +45,6 @@ class OllamaClient:
                 http_response.raise_for_status()
                 response_json = http_response.json()
                 return response_json.get("response", "")
-            except requests.RequestException as request_error:
-                last_error = request_error
-                sleep_seconds = self.retry_backoff_s * (2 ** attempt_index)
-                time.sleep(sleep_seconds)
-
-        raise last_error
-
-    def chat(self, model_name, system_prompt, messages, temperature, num_predict, keep_alive):
-        """Multi-turn completion via /api/chat. `messages` is a list of
-        {"role": "user"|"assistant", "content": str} turns (e.g. one-shot/
-        two-shot worked examples followed by the real trial); the system
-        prompt is passed separately and always placed first. Returns the raw
-        text (str) of the final assistant turn.
-
-        Raises requests.RequestException if all retries are exhausted.
-        """
-        full_messages = [{"role": "system", "content": system_prompt}] + list(messages)
-        request_payload = {
-            "model": model_name,
-            "messages": full_messages,
-            "stream": False,
-            "keep_alive": keep_alive,
-            "options": {
-                "temperature": temperature,
-                "num_predict": num_predict,
-            },
-        }
-
-        last_error = None
-        for attempt_index in range(self.max_retries):
-            try:
-                http_response = requests.post(
-                    f"{self.base_url}/api/chat",
-                    json=request_payload,
-                    timeout=self.request_timeout_s,
-                )
-                http_response.raise_for_status()
-                response_json = http_response.json()
-                return response_json.get("message", {}).get("content", "")
             except requests.RequestException as request_error:
                 last_error = request_error
                 sleep_seconds = self.retry_backoff_s * (2 ** attempt_index)

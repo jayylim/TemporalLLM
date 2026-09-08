@@ -1,0 +1,91 @@
+model_name,option_order,stratum_type,stratum_value,monotonicity_passed,money_preference_passed,indifference_nonincreasing_passed,n_indifference_violations,overall_passed,k,r_squared,k_ci_low,k_ci_high,k_at_boundary,k_is_reliable,k_lower_bound,k_upper_bound,n_trials_fit,n_indifference_points,valid_discount_rate,persona_label,persona_discounting_group
+qwen2.5:7b-instruct-q8_0,pooled,discounting_group,greater,False,False,True,0,False,4.167714097847564,-17.835456157278543,3.3558909777476362,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+qwen2.5:7b-instruct-q8_0,pooled,discounting_group,lesser,False,False,False,1,False,1.5879802484980252,-0.9287936946561888,0.08926137620189249,1.7462123255630264,False,False,1e-06,10.0,5040,7,False,,
+qwen2.5:7b-instruct-q8_0,pooled,persona_id,substance_use,False,False,False,1,False,2.667745236954733,-1.6539843612960508,0.9201896460815453,3.3165357195400764,False,False,1e-06,10.0,1260,7,False,Substance use,greater
+qwen2.5:7b-instruct-q8_0,pooled,persona_id,sugary_food,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Sugary food,greater
+qwen2.5:7b-instruct-q8_0,pooled,persona_id,phone_social_media,False,False,False,1,False,2.743360812828196,-1.5031480551484906,1.0325596200193201,3.3746777426632093,False,False,1e-06,10.0,1260,7,False,Phone and social media,greater
+qwen2.5:7b-instruct-q8_0,pooled,persona_id,retail_spending,False,False,False,1,False,1.8028784067910135,-0.43202577588526525,0.4696034145184862,3.20143319277979,False,False,1e-06,10.0,1260,7,False,Retail spending,greater
+qwen2.5:7b-instruct-q8_0,pooled,persona_id,mindfulness,False,False,False,2,False,0.06265407572046836,-0.32688446830864404,0.02297894201778184,0.7693087343079505,False,False,1e-06,10.0,1260,7,False,Mindfulness,lesser
+qwen2.5:7b-instruct-q8_0,pooled,persona_id,no_smoking_drinking,False,False,False,2,False,0.11860185384918709,-0.40679623136081955,0.05453523787852921,1.8686011140161465,False,False,1e-06,10.0,1260,7,False,No smoking or drinking,lesser
+qwen2.5:7b-instruct-q8_0,pooled,persona_id,strategy_games,False,False,False,3,False,0.08634393567930247,-0.1990796871875844,0.055206588002918215,0.9153896786051258,False,False,1e-06,10.0,1260,7,False,Strategy games,lesser
+qwen2.5:7b-instruct-q8_0,pooled,persona_id,exercise,False,False,False,1,False,1.6332048617524648,-0.7965538180363281,0.3890052821234626,2.087685664553928,False,False,1e-06,10.0,1260,7,False,Exercise,lesser
+qwen3:4b-instruct-2507-q8_0,pooled,discounting_group,greater,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+qwen3:4b-instruct-2507-q8_0,pooled,discounting_group,lesser,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+qwen3:4b-instruct-2507-q8_0,pooled,persona_id,substance_use,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Substance use,greater
+qwen3:4b-instruct-2507-q8_0,pooled,persona_id,sugary_food,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Sugary food,greater
+qwen3:4b-instruct-2507-q8_0,pooled,persona_id,phone_social_media,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Phone and social media,greater
+qwen3:4b-instruct-2507-q8_0,pooled,persona_id,retail_spending,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Retail spending,greater
+qwen3:4b-instruct-2507-q8_0,pooled,persona_id,mindfulness,True,True,True,0,True,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Mindfulness,lesser
+qwen3:4b-instruct-2507-q8_0,pooled,persona_id,no_smoking_drinking,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,No smoking or drinking,lesser
+qwen3:4b-instruct-2507-q8_0,pooled,persona_id,strategy_games,False,False,False,1,False,1.7325593910060857,-0.3881703623056929,0.16170011356844147,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Strategy games,lesser
+qwen3:4b-instruct-2507-q8_0,pooled,persona_id,exercise,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Exercise,lesser
+qwen3:8b-q8_0,pooled,discounting_group,greater,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+qwen3:8b-q8_0,pooled,discounting_group,lesser,False,False,True,0,False,5.651112883236467,,5.449520027025132,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+qwen3:8b-q8_0,pooled,persona_id,substance_use,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Substance use,greater
+qwen3:8b-q8_0,pooled,persona_id,sugary_food,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Sugary food,greater
+qwen3:8b-q8_0,pooled,persona_id,phone_social_media,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Phone and social media,greater
+qwen3:8b-q8_0,pooled,persona_id,retail_spending,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Retail spending,greater
+qwen3:8b-q8_0,pooled,persona_id,mindfulness,False,False,False,2,False,5.0513165549969,-6.73627351123949,1.7653343342375327,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Mindfulness,lesser
+qwen3:8b-q8_0,pooled,persona_id,no_smoking_drinking,False,False,True,0,False,5.651112883236467,,5.634673271108292,5.651112883236467,False,False,1e-06,10.0,1260,7,False,No smoking or drinking,lesser
+qwen3:8b-q8_0,pooled,persona_id,strategy_games,False,False,False,2,False,5.0513165549969,-6.73627351123949,1.765788536152455,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Strategy games,lesser
+qwen3:8b-q8_0,pooled,persona_id,exercise,False,False,False,1,False,5.456039199543022,-344.7649892750504,4.718208978444802,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Exercise,lesser
+qwen3:32b-q8_0,pooled,discounting_group,greater,False,True,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+qwen3:32b-q8_0,pooled,discounting_group,lesser,False,True,True,0,False,0.01031141969346242,0.5864548299729877,0.009798618258172511,0.012161600237587078,False,True,1e-06,10.0,5040,7,False,,
+qwen3:32b-q8_0,pooled,persona_id,substance_use,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Substance use,greater
+qwen3:32b-q8_0,pooled,persona_id,sugary_food,True,True,True,0,True,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Sugary food,greater
+qwen3:32b-q8_0,pooled,persona_id,phone_social_media,True,True,True,0,True,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Phone and social media,greater
+qwen3:32b-q8_0,pooled,persona_id,retail_spending,False,True,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Retail spending,greater
+qwen3:32b-q8_0,pooled,persona_id,mindfulness,False,True,True,0,False,0.009798618258172511,0.556215016297527,0.009798618258172511,0.01585780237137353,False,True,1e-06,10.0,1260,7,False,Mindfulness,lesser
+qwen3:32b-q8_0,pooled,persona_id,no_smoking_drinking,False,True,False,2,False,0.07508682581492222,0.2939254962229779,0.03038077431006185,0.6811644602539783,False,False,1e-06,10.0,1260,7,False,No smoking or drinking,lesser
+qwen3:32b-q8_0,pooled,persona_id,strategy_games,True,True,True,0,True,0.002039318410519633,-7.903002387064436,0.0014815133366029947,0.0033857817465812456,False,False,1e-06,10.0,1260,7,False,Strategy games,lesser
+qwen3:32b-q8_0,pooled,persona_id,exercise,False,True,False,2,False,0.014740511826287118,-0.11341212856941851,0.009798618258172511,0.07686166730912447,False,False,1e-06,10.0,1260,7,False,Exercise,lesser
+qwen3.5:9b-q8_0,pooled,discounting_group,greater,False,True,True,0,False,5.651112883236467,,4.987709896743449,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+qwen3.5:9b-q8_0,pooled,discounting_group,lesser,False,True,False,3,False,0.07640584491533764,-0.2824800077137686,0.004055070210734025,0.2583124651514986,False,False,1e-06,10.0,5040,7,False,,
+qwen3.5:9b-q8_0,pooled,persona_id,substance_use,False,False,True,0,False,5.651112883236467,,0.34287104819506,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Substance use,greater
+qwen3.5:9b-q8_0,pooled,persona_id,sugary_food,False,False,True,0,False,5.651112883236467,,0.7176331893415456,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Sugary food,greater
+qwen3.5:9b-q8_0,pooled,persona_id,phone_social_media,False,False,True,0,False,5.651112883236467,,3.393577501321867,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Phone and social media,greater
+qwen3.5:9b-q8_0,pooled,persona_id,retail_spending,False,True,False,2,False,0.020547429889193225,-0.6889685957477616,0.001894840651361106,2.5027560749319977,False,False,1e-06,10.0,1260,7,False,Retail spending,greater
+qwen3.5:9b-q8_0,pooled,persona_id,mindfulness,False,True,False,2,False,0.007131529363522843,-0.6676492385361106,0.00158973778715942,0.020813558779404082,False,False,1e-06,10.0,1260,7,False,Mindfulness,lesser
+qwen3.5:9b-q8_0,pooled,persona_id,no_smoking_drinking,False,True,False,2,False,1.001447085873876,-0.7601440122743752,0.01477336850705281,4.005185779643911,False,False,1e-06,10.0,1260,7,False,No smoking or drinking,lesser
+qwen3.5:9b-q8_0,pooled,persona_id,strategy_games,False,True,False,2,False,0.008270130385098004,-1.1683027732487634,0.0021941747529553787,0.08634849655199246,False,False,1e-06,10.0,1260,7,False,Strategy games,lesser
+qwen3.5:9b-q8_0,pooled,persona_id,exercise,False,True,False,2,False,0.6838746839268899,-0.8220447571789498,0.0159410266848637,2.8224621950243782,False,False,1e-06,10.0,1260,7,False,Exercise,lesser
+qwen3.5:27b-q8_0,pooled,discounting_group,greater,False,True,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,5002,7,False,,
+qwen3.5:27b-q8_0,pooled,discounting_group,lesser,False,True,True,0,False,0.0017169719233887063,-51.41086336309048,0.0014815133366029947,0.002250781310419055,False,False,1e-06,10.0,5040,7,False,,
+qwen3.5:27b-q8_0,pooled,persona_id,substance_use,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1222,7,False,Substance use,greater
+qwen3.5:27b-q8_0,pooled,persona_id,sugary_food,True,True,True,0,True,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Sugary food,greater
+qwen3.5:27b-q8_0,pooled,persona_id,phone_social_media,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Phone and social media,greater
+qwen3.5:27b-q8_0,pooled,persona_id,retail_spending,True,True,True,0,True,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Retail spending,greater
+qwen3.5:27b-q8_0,pooled,persona_id,mindfulness,False,True,True,0,False,0.0014815133366029947,,0.0014815133366029947,0.0026903836113043836,False,False,1e-06,10.0,1260,7,False,Mindfulness,lesser
+qwen3.5:27b-q8_0,pooled,persona_id,no_smoking_drinking,True,True,True,0,True,0.0014815133366029947,,0.0014815133366029947,0.0014815133366029947,False,False,1e-06,10.0,1260,7,False,No smoking or drinking,lesser
+qwen3.5:27b-q8_0,pooled,persona_id,strategy_games,False,True,True,0,False,0.004828325767590458,0.5492360731115256,0.0014815133366029947,0.005387378444313696,False,True,1e-06,10.0,1260,7,False,Strategy games,lesser
+qwen3.5:27b-q8_0,pooled,persona_id,exercise,False,True,True,0,False,0.0032406100379464846,0.056231240083050804,0.0028315972390474497,0.011945361825893005,False,False,1e-06,10.0,1260,7,False,Exercise,lesser
+qwen3.5:35b-a3b-q8_0,pooled,discounting_group,greater,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+qwen3.5:35b-a3b-q8_0,pooled,discounting_group,lesser,False,True,False,2,False,1.0294257738956099,-1.3421881191105567,0.2870302171722512,3.739751398732067,False,False,1e-06,10.0,5040,7,False,,
+qwen3.5:35b-a3b-q8_0,pooled,persona_id,substance_use,True,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Substance use,greater
+qwen3.5:35b-a3b-q8_0,pooled,persona_id,sugary_food,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Sugary food,greater
+qwen3.5:35b-a3b-q8_0,pooled,persona_id,phone_social_media,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Phone and social media,greater
+qwen3.5:35b-a3b-q8_0,pooled,persona_id,retail_spending,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Retail spending,greater
+qwen3.5:35b-a3b-q8_0,pooled,persona_id,mindfulness,False,False,False,2,False,0.09082084553899052,-0.050751380133080115,0.021828643168960497,0.9994456400116041,False,False,1e-06,10.0,1260,7,False,Mindfulness,lesser
+qwen3.5:35b-a3b-q8_0,pooled,persona_id,no_smoking_drinking,False,True,False,3,False,0.6192765276155395,-0.7153034617229028,0.1639051212024311,2.06116816264782,False,False,1e-06,10.0,1260,7,False,No smoking or drinking,lesser
+qwen3.5:35b-a3b-q8_0,pooled,persona_id,strategy_games,False,True,False,2,False,0.9237820723339562,-1.2926952847570234,0.06283242055410182,3.350169418484017,False,False,1e-06,10.0,1260,7,False,Strategy games,lesser
+qwen3.5:35b-a3b-q8_0,pooled,persona_id,exercise,False,True,False,2,False,4.4102923766014515,-4.125200402028262,0.4727386301844093,5.642193306326301,False,False,1e-06,10.0,1260,7,False,Exercise,lesser
+llama3.1:8b-instruct-q8_0,pooled,discounting_group,greater,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,4644,7,False,,
+llama3.1:8b-instruct-q8_0,pooled,discounting_group,lesser,False,False,True,0,False,5.651112883236467,,5.651112883236467,5.651112883236467,False,False,1e-06,10.0,5040,7,False,,
+llama3.1:8b-instruct-q8_0,pooled,persona_id,substance_use,False,False,True,0,False,5.651112883236467,,1.4311055258038867,5.651112883236467,False,False,1e-06,10.0,864,7,False,Substance use,greater
+llama3.1:8b-instruct-q8_0,pooled,persona_id,sugary_food,False,False,True,0,False,5.651112883236467,,1.7322058355033312,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Sugary food,greater
+llama3.1:8b-instruct-q8_0,pooled,persona_id,phone_social_media,False,False,True,0,False,5.651112883236467,,0.637516367489602,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Phone and social media,greater
+llama3.1:8b-instruct-q8_0,pooled,persona_id,retail_spending,False,False,True,0,False,5.651112883236467,,0.7083866191449862,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Retail spending,greater
+llama3.1:8b-instruct-q8_0,pooled,persona_id,mindfulness,False,False,True,0,False,5.651112883236467,,0.7176331893415456,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Mindfulness,lesser
+llama3.1:8b-instruct-q8_0,pooled,persona_id,no_smoking_drinking,False,False,True,0,False,5.651112883236467,,1.7325593910060857,5.651112883236467,False,False,1e-06,10.0,1260,7,False,No smoking or drinking,lesser
+llama3.1:8b-instruct-q8_0,pooled,persona_id,strategy_games,False,False,True,0,False,5.651112883236467,,0.6013287842094699,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Strategy games,lesser
+llama3.1:8b-instruct-q8_0,pooled,persona_id,exercise,False,False,True,0,False,5.651112883236467,,0.3477703814791642,5.651112883236467,False,False,1e-06,10.0,1260,7,False,Exercise,lesser
+mistral:7b-instruct-q8_0,pooled,discounting_group,greater,False,False,True,0,False,5.651112883236467,,4.578685083187651,5.651112883236467,False,False,1e-06,10.0,2930,7,False,,
+mistral:7b-instruct-q8_0,pooled,discounting_group,lesser,False,False,False,1,False,4.409821724367458,-29.975174962324065,0.09996421070573563,5.63829473825836,False,False,1e-06,10.0,2942,7,False,,
+mistral:7b-instruct-q8_0,pooled,persona_id,substance_use,False,False,True,0,False,3.1917985763350147,-2.870061599559727,0.3947641404127878,5.651112883236467,False,False,1e-06,10.0,694,7,False,Substance use,greater
+mistral:7b-instruct-q8_0,pooled,persona_id,sugary_food,False,False,True,0,False,5.651112883236467,,2.724085831471576,5.651112883236467,False,False,1e-06,10.0,764,7,False,Sugary food,greater
+mistral:7b-instruct-q8_0,pooled,persona_id,phone_social_media,False,False,False,1,False,1.7325593910060857,-0.3881703623056929,0.14917187848483748,5.651112883236467,False,False,1e-06,10.0,737,7,False,Phone and social media,greater
+mistral:7b-instruct-q8_0,pooled,persona_id,retail_spending,False,False,True,0,False,5.651112883236467,,0.24375313006499957,5.651112883236467,False,False,1e-06,10.0,735,7,False,Retail spending,greater
+mistral:7b-instruct-q8_0,pooled,persona_id,mindfulness,False,False,False,2,False,0.06821707886696693,-0.1715130809461609,0.007682999592747836,4.067801411605383,False,False,1e-06,10.0,703,7,False,Mindfulness,lesser
+mistral:7b-instruct-q8_0,pooled,persona_id,no_smoking_drinking,False,False,False,1,False,0.15179705011499106,-0.5089991111359327,0.028109894294168374,4.692119122365785,False,False,1e-06,10.0,755,7,False,No smoking or drinking,lesser
+mistral:7b-instruct-q8_0,pooled,persona_id,strategy_games,False,False,False,1,False,1.000882505425617,0.7285860222760956,0.004211642380400191,4.523458575554067,False,True,1e-06,10.0,767,7,False,Strategy games,lesser
+mistral:7b-instruct-q8_0,pooled,persona_id,exercise,False,False,False,1,False,3.8822802679176274,-0.6921717380580956,0.025588212761294388,5.58461961452834,False,False,1e-06,10.0,717,7,False,Exercise,lesser

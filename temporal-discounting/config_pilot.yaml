@@ -1,9 +1,5 @@
-# Small-grid pilot config, currently repurposed to TIME the --mode cot run
-# (the slow one, ~300-token completions) across all 3 models on this machine,
-# so we can extrapolate to the full N=30 x 49-cell x 3-model cot run before
-# committing to it. Writes to separate data/results directories so it never
-# touches the real direct-mode results already collected under config.yaml.
-# Only intended to be invoked with `--mode cot` right now.
+# Small-grid pilot config for timing / end-to-end checks. Writes to separate
+# data/results directories so it never touches results under config.yaml.
 
 ollama:
   base_url: "http://localhost:11434"
@@ -13,15 +9,14 @@ ollama:
   retry_backoff_s: 2
 
 models:
-  - qwen2.5:1.5b-instruct
-  - qwen2.5:3b-instruct
-  - qwen2.5:7b-instruct
+  - qwen2.5:7b-instruct-fp16
+  - qwen3:4b-instruct-2507-fp16
 
 waiting_game:
   later_amount_dollars: 1000
   delay_grid_months: [3, 24]
   amount_grid_dollars: [0, 450, 900]
-  n_samples_per_cell: 2   # reduced from 3 -> 12 trials/model (still enough to average out per-trial variance)
+  n_samples_per_cell: 2
   temperature: 1.0
   num_predict: 5
   system_prompt: >-
@@ -38,19 +33,6 @@ waiting_game:
     exactly as "FINAL ANSWER: A" or "FINAL ANSWER: B", with no other text on
     that line.
   cot_num_predict: 300
-
-  few_shot_example_order_seed: 20260825
-  one_shot_examples:
-    - sooner_amount_dollars: 0
-      delay_months: 18
-      correct_choice: later
-  two_shot_examples:
-    - sooner_amount_dollars: 0
-      delay_months: 18
-      correct_choice: later
-    - sooner_amount_dollars: 980
-      delay_months: 18
-      correct_choice: sooner
 
 competence_checks:
   monotonicity_tolerance: 0.0

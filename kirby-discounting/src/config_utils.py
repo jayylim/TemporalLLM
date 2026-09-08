@@ -8,7 +8,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def load_config(config_path=None):
     if config_path is None:
-        config_path = os.path.join(PROJECT_ROOT, "config.yaml")
+        config_path = os.path.join(PROJECT_ROOT, "config_non-quantized.yaml") #change this if changing the models i want to use
     with open(config_path, "r") as config_file:
         return yaml.safe_load(config_file)
 

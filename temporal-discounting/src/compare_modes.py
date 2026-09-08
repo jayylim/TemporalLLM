@@ -1,21 +1,12 @@
 """Cross-mode comparison: aggregates comparison_summary{mode}.csv across
-every reasoning mode that has been run (direct / cot / one_shot / two_shot),
-to test whether prompting interventions change competence-check pass rates
-or hyperbolic-fit reliability for each model.
+every reasoning mode that has been run (direct / cot), to test whether
+prompting interventions change competence-check pass rates or hyperbolic-fit
+reliability for each model.
 
 Also writes a clean factor-summary folder (`results/summary/`) with:
   - by_condition.csv  — one row per model × trial_type × persona
   - by_factor.csv     — rollups of pass rates / mean k by each factor
   - README.md         — column definitions
-
-Motivation (see PREREGISTRATION.md "Exploratory extension"): Ross, Kim & Lo
-(2024) sec. 4 found that, for GPT-4's risk/loss aversion in their gambling
-game, direct prompting and zero-shot CoT often failed to reliably elicit the
-intended economic behavior, while one-shot prompting was more effective
-(two-shot showed mixed results). This script lets us check whether the same
-pattern holds for our local Qwen models' time-discounting *competence*
-(monotonicity + money preference) in the waiting game -- an extrapolation the
-original paper did not itself test.
 
 Usage: python src/compare_modes.py [--config path/to/config.yaml]
 """
@@ -35,14 +26,10 @@ from run_experiment import REASONING_MODES
 MODE_DISPLAY_LABELS = {
     "direct": "direct",
     "cot": "chain-of-thought",
-    "one_shot": "one-shot",
-    "two_shot": "two-shot",
 }
 MODE_COLORS = {
     "direct": "#1f77b4",
     "cot": "#ff7f0e",
-    "one_shot": "#2ca02c",
-    "two_shot": "#d62728",
 }
 MODE_SORT_ORDER = {mode: index for index, mode in enumerate(REASONING_MODES)}
 PERSONA_CONDITIONS = [False, True]
@@ -53,6 +40,9 @@ CONDITION_SUMMARY_COLUMNS = [
     "model_family",
     "trial_type",
     "persona",
+    "persona_id",
+    "persona_label",
+    "persona_discounting_group",
     "option_order",
     "monotonicity_passed",
     "money_preference_passed",
@@ -99,7 +89,7 @@ def model_family_from_name(model_name):
 
 
 def build_condition_summary(combined_df):
-    """One clean row per model × trial_type × persona × option_order."""
+    """One clean row per model × trial_type × persona × persona_id × option_order."""
     summary_df = combined_df.copy()
     summary_df["trial_type"] = summary_df["reasoning_mode"].map(
         lambda mode: MODE_DISPLAY_LABELS.get(mode, mode)
@@ -109,6 +99,9 @@ def build_condition_summary(combined_df):
     )
     if "option_order" not in summary_df.columns:
         summary_df["option_order"] = "pooled"
+    for col in ("persona_id", "persona_label", "persona_discounting_group"):
+        if col not in summary_df.columns:
+            summary_df[col] = None
     summary_df["model_family"] = summary_df["model_name"].map(model_family_from_name)
     summary_df["competence_passed"] = summary_df["overall_passed"]
     summary_df["k_reliable"] = summary_df["k_is_reliable"]
@@ -124,8 +117,11 @@ def build_condition_summary(combined_df):
     summary_df["_order_order"] = summary_df["option_order"].map(
         lambda o: OPTION_ORDER_SORT.get(o, 99)
     )
+    summary_df["_group_order"] = summary_df["persona_discounting_group"].map(
+        lambda g: {"greater": 0, "lesser": 1}.get(g, 2)
+    )
     summary_df = summary_df.sort_values(
-        ["model_name", "_mode_order", "persona", "_order_order"]
+        ["model_name", "_mode_order", "persona", "_group_order", "persona_id", "_order_order"]
     ).reset_index(drop=True)
 
     present_cols = [c for c in CONDITION_SUMMARY_COLUMNS if c in summary_df.columns]
@@ -161,6 +157,8 @@ def build_factor_rollups(condition_df):
         ("model_family", "model_family"),
         ("trial_type", "trial_type"),
         ("persona", "persona"),
+        ("persona_id", "persona_id"),
+        ("persona_discounting_group", "persona_discounting_group"),
         ("option_order", "option_order"),
     ]
     for col, factor_name in single_factors:
@@ -179,6 +177,9 @@ def build_factor_rollups(condition_df):
         (("option_order", "trial_type"), "option_order_x_trial_type"),
         (("option_order", "persona"), "option_order_x_persona"),
         (("model_name", "option_order"), "model_x_option_order"),
+        (("persona_discounting_group", "persona"), "discounting_group_x_persona"),
+        (("model_family", "persona_discounting_group"), "model_family_x_discounting_group"),
+        (("model_name", "persona_id"), "model_x_persona_id"),
     ]
     for cols, factor_name in pair_specs:
         if any(c not in condition_df.columns for c in cols):
@@ -195,22 +196,22 @@ def build_factor_rollups(condition_df):
     return rollup_df.sort_values(["factor", "level"]).reset_index(drop=True)
 
 
-def load_demographic_strata(tables_dir, modes):
-    """Loads any comparison_summary_by_demographics* tables written by analyze.py."""
+def load_persona_strata(tables_dir, modes):
+    """Loads comparison_summary_by_persona* tables written by analyze.py."""
     strata_frames = []
     for reasoning_mode in modes:
         for persona_enabled in PERSONA_CONDITIONS:
             if not persona_enabled:
-                continue  # demographics only exist for persona-on runs
+                continue  # persona strata only exist for persona-on runs
             suffix = result_suffix(reasoning_mode, persona_enabled)
-            csv_path = os.path.join(tables_dir, f"comparison_summary_by_demographics{suffix}.csv")
+            csv_path = os.path.join(tables_dir, f"comparison_summary_by_persona{suffix}.csv")
             if not os.path.exists(csv_path):
                 continue
             strata_df = pd.read_csv(csv_path)
             strata_df["trial_type"] = MODE_DISPLAY_LABELS.get(reasoning_mode, reasoning_mode)
             strata_df["persona"] = "on"
             strata_frames.append(strata_df)
-            print(f"[demographics / {reasoning_mode}] loaded {csv_path}")
+            print(f"[persona strata / {reasoning_mode}] loaded {csv_path}")
     if not strata_frames:
         return pd.DataFrame()
     return pd.concat(strata_frames, ignore_index=True)
@@ -220,8 +221,9 @@ def write_summary_readme(summary_dir, human_k, k_lower_bound, k_upper_bound):
     readme = f"""# Waiting Game — factor summary
 
 Clean tables for scanning results across **model**, **trial type** (prompting
-mode: direct / chain-of-thought / one-shot / two-shot), **persona** (on/off),
-and **option_order** (pooled / sooner_A / sooner_B).
+mode: direct / chain-of-thought), **persona** (on/off), **persona_id** /
+**persona_discounting_group** (behavioral personas), and **option_order**
+(pooled / sooner_A / sooner_B).
 
 Human benchmark (Rachlin et al. 1991): k = {human_k} per month.
 Reasonable k bounds (hits cut from reliability, still reported): [{k_lower_bound}, {k_upper_bound}].
@@ -230,16 +232,17 @@ Reasonable k bounds (hits cut from reliability, still reported): [{k_lower_bound
 
 | File | Contents |
 |---|---|
-| `by_condition.csv` | One row per **model × trial_type × persona × option_order** with competence gates, fit reliability, and fitted k. **Start here.** |
+| `by_condition.csv` | One row per **model × trial_type × persona × persona_id × option_order** with competence gates, fit reliability, and fitted k. **Start here.** |
 | `by_factor.csv` | Rollups: pass rates and mean/median k (when valid) by each factor alone and useful pairs (e.g. trial_type × persona). |
-| `by_demographics.csv` | Present only when persona-on runs exist: gender / age-band strata from `analyze.py`. |
+| `by_persona.csv` | Present only when persona-on runs exist: discounting_group / persona_id strata from `analyze.py`. |
 | `sanity_check_summary.md` | Human-readable checklist table (same content as `results/tables/sanity_check_summary.md`). |
 
 ## `by_condition.csv` columns
 
 - **model_name** / **model_family**: full Ollama tag and coarse family (qwen2.5, qwen3, llama3.1, mistral).
-- **trial_type**: prompting condition (`direct`, `chain-of-thought`, `one-shot`, `two-shot`).
-- **persona**: `on` or `off` demographic persona framing.
+- **trial_type**: prompting condition (`direct`, `chain-of-thought`).
+- **persona**: `on` or `off` behavioral persona framing.
+- **persona_id** / **persona_label** / **persona_discounting_group**: specific lifestyle persona and researcher-only greater/lesser tag (null when persona=off).
 - **option_order**: `pooled` (all trials), `sooner_A` (sooner listed as option A), or `sooner_B` (sooner listed as option B).
 - **competence_passed**: monotonicity AND money-preference AND indifference-nonincreasing all pass.
 - **k_reliable**: hyperbolic NLS R^2 adequate, enough indifference points, AND fitted k not at bound.
@@ -259,7 +262,7 @@ def write_factor_summary_folder(combined_df, tables_dir, summary_dir, human_k,
     """Writes the clean results/summary/ factor tables."""
     condition_df = build_condition_summary(combined_df)
     rollup_df = build_factor_rollups(condition_df)
-    demographics_df = load_demographic_strata(tables_dir, REASONING_MODES)
+    persona_strata_df = load_persona_strata(tables_dir, REASONING_MODES)
 
     condition_path = os.path.join(summary_dir, "by_condition.csv")
     rollup_path = os.path.join(summary_dir, "by_factor.csv")
@@ -268,10 +271,10 @@ def write_factor_summary_folder(combined_df, tables_dir, summary_dir, human_k,
 
     written = [condition_path, rollup_path]
 
-    if not demographics_df.empty:
-        demographics_path = os.path.join(summary_dir, "by_demographics.csv")
-        demographics_df.to_csv(demographics_path, index=False)
-        written.append(demographics_path)
+    if not persona_strata_df.empty:
+        persona_path = os.path.join(summary_dir, "by_persona.csv")
+        persona_strata_df.to_csv(persona_path, index=False)
+        written.append(persona_path)
 
     sanity_path = os.path.join(summary_dir, "sanity_check_summary.md")
     with open(sanity_path, "w") as sanity_file:
@@ -302,8 +305,18 @@ def build_sanity_check_markdown(combined_df, human_k, k_lower_bound, k_upper_bou
     sort_cols.append("_order_order")
     sortable_df = sortable_df.sort_values(sort_cols)
 
+    has_persona_id = (
+        "persona_id" in sortable_df.columns and sortable_df["persona_id"].notna().any()
+    )
     has_indiff = "indifference_nonincreasing_passed" in sortable_df.columns
-    if has_indiff:
+    if has_persona_id and has_indiff:
+        header = (
+            "| Model | Mode | Persona | Persona ID | Group | Order | Monotonicity | Money Pref. | "
+            "Indiff. Non-incr. | Competence Pass | R^2 (indiff. fit) | k Reliable? | "
+            "**Valid Discount Rate** | Fitted k [95% CI] |"
+        )
+        separator = "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
+    elif has_indiff:
         header = (
             "| Model | Mode | Persona | Order | Monotonicity | Money Pref. | Indiff. Non-incr. | "
             "Competence Pass | R^2 (indiff. fit) | k Reliable? | **Valid Discount Rate** | Fitted k [95% CI] |"
@@ -322,7 +335,22 @@ def build_sanity_check_markdown(combined_df, human_k, k_lower_bound, k_upper_bou
         order_label = row.get("option_order", "pooled")
         r2 = row["r_squared"] if "r_squared" in row and not pd.isna(row["r_squared"]) else float("nan")
         r2_str = "-" if pd.isna(r2) else f"{r2:.3f}"
-        if has_indiff:
+        persona_id = row.get("persona_id")
+        persona_id_label = "-" if pd.isna(persona_id) or persona_id is None else str(persona_id)
+        group = row.get("persona_discounting_group")
+        group_label = "-" if pd.isna(group) or group is None else str(group)
+        if has_persona_id and has_indiff:
+            rows.append(
+                f"| {row['model_name']} | {mode_label} | {persona_label} | {persona_id_label} | "
+                f"{group_label} | {order_label} | "
+                f"{checkmark(row['monotonicity_passed'])} | "
+                f"{checkmark(row['money_preference_passed'])} | "
+                f"{checkmark(row['indifference_nonincreasing_passed'])} | "
+                f"{checkmark(row['overall_passed'])} | "
+                f"{r2_str} | {checkmark(row['k_is_reliable'])} | "
+                f"**{checkmark(row['valid_discount_rate'])}** | {format_k_with_ci(row)} |"
+            )
+        elif has_indiff:
             rows.append(
                 f"| {row['model_name']} | {mode_label} | {persona_label} | {order_label} | "
                 f"{checkmark(row['monotonicity_passed'])} | "
@@ -364,10 +392,194 @@ Results stratified by A/B option order (pooled / sooner_A / sooner_B).
 - **k Reliable?**: R^2 above threshold, enough indifference points, AND fitted k did not land at the optimizer's boundary ([{k_lower_bound}, {k_upper_bound}]). Bound hits are cut from reliability; the bound values themselves are still reported.
 - **Valid Discount Rate**: Competence Pass AND k Reliable \u2014 the single bottom-line flag for whether the fitted k should be trusted at all.
 - **Fitted k [95% CI]**: hyperbolic discount rate per month with bootstrap 95% CI, shown regardless of reliability (compare against the "k Reliable?"/"Valid Discount Rate" columns before interpreting).
-- **Persona**: on/off demographic persona framing; demographic strata (gender, age band) are in `by_demographics.csv` / `comparison_summary_by_demographics*.csv` when persona-on data exists.
+- **Persona**: on/off behavioral persona framing; per-persona and greater/lesser discounting-group strata are in `by_persona.csv` / `comparison_summary_by_persona*.csv` when persona-on data exists.
 - **Order**: `pooled` / `sooner_A` / `sooner_B` — whether the sooner option was listed as A or B (or all trials pooled).
 """
     return legend
+
+
+def _k_reliable_ignoring_bounds(row, min_r_squared=0.5, min_n_points=3):
+    """Fit-quality gate without bound or R² cutoffs.
+
+    Bound hits and flat-indifference fits (nan / low R², often extreme k) are
+    still counted as reliable when k is finite and enough indifference points
+    exist. `min_r_squared` is accepted for API compatibility but unused.
+    """
+    del min_r_squared  # intentionally unused in this alternate summary
+    k = row.get("k")
+    if k is None or (isinstance(k, float) and np.isnan(k)) or pd.isna(k):
+        return False
+    n_points = row.get("n_indifference_points")
+    if n_points is None or pd.isna(n_points) or int(n_points) < min_n_points:
+        return False
+    return True
+
+
+def build_sanity_check_markdown_for_order(
+    order_df, option_order, human_k, min_r_squared=0.5, min_n_points=3
+):
+    """Sanity-check table for one option_order stratum.
+
+    Differs from the main sanity summary:
+      - no Mode column
+      - k reliability ignores upper/lower bound hits (R^2 + n_points only)
+    """
+    sortable_df = order_df.copy()
+    sortable_df["_persona_order"] = sortable_df.get("persona_enabled", False)
+    if "persona_discounting_group" in sortable_df.columns:
+        sortable_df["_group_order"] = sortable_df["persona_discounting_group"].map(
+            lambda g: {"greater": 0, "lesser": 1}.get(g, 2) if pd.notna(g) else 3
+        )
+    else:
+        sortable_df["_group_order"] = 3
+    sort_cols = ["model_name"]
+    if "persona_enabled" in sortable_df.columns:
+        sort_cols.append("_persona_order")
+    sort_cols.append("_group_order")
+    if "persona_id" in sortable_df.columns:
+        sort_cols.append("persona_id")
+    sortable_df = sortable_df.sort_values(sort_cols)
+
+    has_persona_id = (
+        "persona_id" in sortable_df.columns and sortable_df["persona_id"].notna().any()
+    )
+    has_indiff = "indifference_nonincreasing_passed" in sortable_df.columns
+
+    if has_persona_id and has_indiff:
+        header = (
+            "| Model | Persona | Persona ID | Group | Monotonicity | Money Pref. | "
+            "Indiff. Non-incr. | Competence Pass | R^2 (indiff. fit) | k Reliable? | "
+            "**Valid Discount Rate** | Fitted k [95% CI] |"
+        )
+        separator = "|---|---|---|---|---|---|---|---|---|---|---|---|"
+    elif has_indiff:
+        header = (
+            "| Model | Persona | Monotonicity | Money Pref. | Indiff. Non-incr. | "
+            "Competence Pass | R^2 (indiff. fit) | k Reliable? | **Valid Discount Rate** | "
+            "Fitted k [95% CI] |"
+        )
+        separator = "|---|---|---|---|---|---|---|---|---|---|"
+    else:
+        header = (
+            "| Model | Persona | Monotonicity | Money Pref. | Competence Pass | "
+            "R^2 (indiff. fit) | k Reliable? | **Valid Discount Rate** | Fitted k [95% CI] |"
+        )
+        separator = "|---|---|---|---|---|---|---|---|---|"
+
+    rows = [header, separator]
+    n_valid = 0
+    n_rows = 0
+    for _, row in sortable_df.iterrows():
+        n_rows += 1
+        persona_label = "on" if bool(row.get("persona_enabled", False)) else "off"
+        r2 = row["r_squared"] if "r_squared" in row and not pd.isna(row["r_squared"]) else float("nan")
+        r2_str = "-" if pd.isna(r2) else f"{r2:.3f}"
+        persona_id = row.get("persona_id")
+        persona_id_label = "-" if pd.isna(persona_id) or persona_id is None else str(persona_id)
+        group = row.get("persona_discounting_group")
+        group_label = "-" if pd.isna(group) or group is None else str(group)
+
+        k_reliable = _k_reliable_ignoring_bounds(row, min_r_squared, min_n_points)
+        competence = bool(row.get("overall_passed", False))
+        valid = competence and k_reliable
+        if valid:
+            n_valid += 1
+
+        if has_persona_id and has_indiff:
+            rows.append(
+                f"| {row['model_name']} | {persona_label} | {persona_id_label} | "
+                f"{group_label} | "
+                f"{checkmark(row['monotonicity_passed'])} | "
+                f"{checkmark(row['money_preference_passed'])} | "
+                f"{checkmark(row['indifference_nonincreasing_passed'])} | "
+                f"{checkmark(competence)} | "
+                f"{r2_str} | {checkmark(k_reliable)} | "
+                f"**{checkmark(valid)}** | {format_k_with_ci(row)} |"
+            )
+        elif has_indiff:
+            rows.append(
+                f"| {row['model_name']} | {persona_label} | "
+                f"{checkmark(row['monotonicity_passed'])} | "
+                f"{checkmark(row['money_preference_passed'])} | "
+                f"{checkmark(row['indifference_nonincreasing_passed'])} | "
+                f"{checkmark(competence)} | "
+                f"{r2_str} | {checkmark(k_reliable)} | "
+                f"**{checkmark(valid)}** | {format_k_with_ci(row)} |"
+            )
+        else:
+            rows.append(
+                f"| {row['model_name']} | {persona_label} | "
+                f"{checkmark(row['monotonicity_passed'])} | "
+                f"{checkmark(row['money_preference_passed'])} | "
+                f"{checkmark(competence)} | "
+                f"{r2_str} | {checkmark(k_reliable)} | "
+                f"**{checkmark(valid)}** | {format_k_with_ci(row)} |"
+            )
+
+    table_markdown = "\n".join(rows)
+    return f"""# Waiting Game: Sanity Check Summary (order = `{option_order}`)
+
+Option-order stratum: **{option_order}**. Human benchmark (Rachlin et al. 1991): k = {human_k} per month.
+
+**Bound-agnostic reliability:** fitted k is *not* rejected for landing at the
+optimizer's lower/upper bound, and R² is not used as a gate (flat indifference
+curves that yield extreme k still count). `k Reliable?` requires only: k is
+finite and ≥ {min_n_points} indifference points.
+Valid discount rate = Competence Pass AND that bound-agnostic k Reliable.
+Valid cells in this file: **{n_valid} / {n_rows}**.
+
+Fitting method: per delay, interpolate the sooner amount at P(choose sooner)=0.5, then
+nonlinear least-squares fit of x(d) = $later / (1 + k*d) to those empirical immediate equivalents.
+
+{table_markdown}
+
+## Column definitions
+
+- **Monotonicity**: P(choose sooner) does not decrease as the sooner amount increases, for every delay.
+- **Money Pref.**: model doesn't prefer $0 now over positive delayed money, at any delay.
+- **Indiff. Non-incr.**: empirical 50% immediate equivalents x*(d) are non-increasing in delay.
+- **Competence Pass**: Monotonicity AND Money Pref. AND Indiff. Non-incr. all pass.
+- **R^2 (indiff. fit)**: goodness of fit of the hyperbolic indifference curve to the per-delay 50% switching points.
+- **k Reliable?**: k is finite and ≥ {min_n_points} indifference points (bound hits and R² ignored).
+- **Valid Discount Rate**: Competence Pass AND k Reliable (bound-agnostic).
+- **Fitted k [95% CI]**: hyperbolic discount rate per month with bootstrap 95% CI.
+- **Persona**: on/off behavioral persona framing; Persona ID / Group when persona-on.
+"""
+
+
+def write_order_sanity_summaries(
+    combined_df, tables_dir, summary_dir, human_k, fitting_config=None
+):
+    """Writes three bound-agnostic sanity markdown files, one per option_order."""
+    fitting_config = fitting_config or {}
+    min_r_squared = float(fitting_config.get("min_r_squared", 0.5))
+    min_n_points = int(fitting_config.get("min_n_indifference_points", 3))
+
+    working_df = combined_df.copy()
+    if "option_order" not in working_df.columns:
+        working_df["option_order"] = "pooled"
+
+    written = []
+    for option_order, _ in [
+        ("pooled", None),
+        ("sooner_A", True),
+        ("sooner_B", False),
+    ]:
+        order_df = working_df[working_df["option_order"] == option_order]
+        if order_df.empty:
+            print(f"[sanity / {option_order}] no rows; skipped.")
+            continue
+        markdown = build_sanity_check_markdown_for_order(
+            order_df, option_order, human_k, min_r_squared, min_n_points
+        )
+        filename = f"sanity_check_summary_{option_order}.md"
+        for target_dir in (tables_dir, summary_dir):
+            path = os.path.join(target_dir, filename)
+            with open(path, "w") as markdown_file:
+                markdown_file.write(markdown)
+            written.append(path)
+            print(f"Wrote bound-agnostic sanity summary ({option_order}) to {path}")
+    return written
 
 
 def load_available_mode_tables(tables_dir, modes):
@@ -475,14 +687,16 @@ def main():
 
     print(f"\n=== Cross-mode comparison ===")
     print_cols = [
-        "model_name", "reasoning_mode", "persona_enabled", "option_order",
+        "model_name", "reasoning_mode", "persona_enabled", "persona_id",
+        "persona_discounting_group", "option_order",
         "monotonicity_passed", "money_preference_passed",
         "indifference_nonincreasing_passed",
         "k_is_reliable", "valid_discount_rate", "k",
     ]
     print_cols = [c for c in print_cols if c in combined_df.columns]
-    sort_cols = [c for c in ["model_name", "reasoning_mode", "persona_enabled", "option_order"]
-                 if c in combined_df.columns]
+    sort_cols = [c for c in [
+        "model_name", "reasoning_mode", "persona_enabled", "persona_id", "option_order"
+    ] if c in combined_df.columns]
     print(combined_df[print_cols].sort_values(sort_cols).to_string(index=False))
     print(f"\nWrote combined table to {combined_csv_path}")
 
@@ -499,12 +713,18 @@ def main():
         markdown_file.write(sanity_check_markdown)
     print(f"Wrote presentable sanity-check summary table to {sanity_check_path}")
 
+    order_sanity_paths = write_order_sanity_summaries(
+        combined_df, tables_dir, summary_dir, human_k, config.get("fitting")
+    )
+
     written_paths, condition_df, rollup_df = write_factor_summary_folder(
         combined_df, tables_dir, summary_dir, human_k, k_lower, k_upper, sanity_check_markdown
     )
+    written_paths = list(written_paths) + list(order_sanity_paths)
     print(f"\n=== Factor summary folder ({summary_dir}) ===")
     cond_print = [
-        "model_name", "trial_type", "persona", "option_order", "competence_passed",
+        "model_name", "trial_type", "persona", "persona_id",
+        "persona_discounting_group", "option_order", "competence_passed",
         "k_reliable", "valid_discount_rate", "k",
     ]
     cond_print = [c for c in cond_print if c in condition_df.columns]

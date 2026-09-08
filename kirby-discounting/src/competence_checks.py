@@ -25,7 +25,7 @@ run is flagged low-quality/unreliable.
 Magnitude-effect check (reported, not gating): does small_k > medium_k >
 large_k hold (the classic human "more patience for larger rewards" effect)?
 
-Usage: python src/competence_checks.py [--config path/to/config.yaml] [--mode direct|cot|one_shot|two_shot]
+Usage: python src/competence_checks.py [--config path/to/config.yaml] [--mode direct|cot]
 """
 
 import argparse

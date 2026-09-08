@@ -78,50 +78,6 @@ def build_trial(item, sample_index, variant, order_rng):
     }
 
 
-def build_few_shot_messages(example_defs, order_rng):
-    """Renders a list of worked examples (config `one_shot_examples` /
-    `two_shot_examples`) into alternating user/assistant chat turns, with the
-    A/B order randomized per example (using order_rng) so the assistant's
-    demonstrated answer isn't trivially always the same letter. Always uses
-    verbatim-style wording (the few-shot examples aren't scored items, so the
-    paraphrase contamination control doesn't apply to them).
-    """
-    example_messages = []
-    for example in example_defs:
-        sooner_option_text, later_option_text = render_verbatim_option_texts(
-            example["sir_amount_dollars"], example["ldr_amount_dollars"], example["delay_days"]
-        )
-
-        sooner_is_option_a = order_rng.random() < 0.5
-        if sooner_is_option_a:
-            option_a_text, option_b_text = sooner_option_text, later_option_text
-        else:
-            option_a_text, option_b_text = later_option_text, sooner_option_text
-
-        correct_choice_is_sooner = example["correct_choice"] == "sooner"
-        correct_letter = "A" if (correct_choice_is_sooner == sooner_is_option_a) else "B"
-
-        example_messages.append({"role": "user", "content": render_user_prompt(option_a_text, option_b_text)})
-        example_messages.append({"role": "assistant", "content": correct_letter})
-    return example_messages
-
-
-def build_few_shot_messages_for_mode(kirby_config, reasoning_mode):
-    """Returns the rendered few-shot example turns for `--mode one_shot` /
-    `--mode two_shot`, or [] for any other mode (direct/cot use no examples).
-    """
-    example_config_key_by_mode = {
-        "one_shot": "one_shot_examples",
-        "two_shot": "two_shot_examples",
-    }
-    example_config_key = example_config_key_by_mode.get(reasoning_mode)
-    if example_config_key is None:
-        return []
-
-    order_rng = random.Random(kirby_config["few_shot_example_order_seed"])
-    return build_few_shot_messages(kirby_config[example_config_key], order_rng)
-
-
 def build_all_trials(kirby_config, items):
     """Builds every trial (all 27 items x all samples) for one model, in a
     fixed reproducible order determined by kirby_config['random_seed'].

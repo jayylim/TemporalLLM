@@ -37,6 +37,7 @@ from config_utils import (
     result_suffix,
     persona_enabled_from_config,
 )
+from persona import iter_persona_groups
 from run_experiment import REASONING_MODES, safe_filename_for_model
 
 MODEL_COLORS = [
@@ -60,7 +61,7 @@ def compute_p_sooner_table(model_choices_df):
     parsed_rows_df = model_choices_df.dropna(subset=["chose_sooner_option"]).copy()
     # chose_sooner_option round-trips through CSV as an object column (mix of
     # bool/NaN) whenever any parse failures exist elsewhere in the dataframe
-    # (common for cot/one_shot/two_shot modes), which silently makes the
+    # (common for cot mode), which silently makes the
     # pivoted table object-dtype too and breaks downstream numeric ops
     # (e.g. np.interp in analyze.py). Cast explicitly so it's always float.
     parsed_rows_df["chose_sooner_option"] = parsed_rows_df["chose_sooner_option"].astype(bool).astype(float)
@@ -301,47 +302,56 @@ def main():
             print(f"[{model_name}] no parsed choices found, skipping.")
             continue
 
-        for option_order, sooner_is_a in OPTION_ORDER_STRATA:
-            stratum_df = filter_by_option_order(model_choices_df, sooner_is_a)
-            if stratum_df.empty:
-                print(f"[{model_name} / {option_order}] no trials, skipping.")
-                continue
+        for persona_id, discounting_group, persona_label, persona_df in iter_persona_groups(
+            model_choices_df
+        ):
+            persona_tag = f" / {persona_id}" if persona_id is not None else ""
+            for option_order, sooner_is_a in OPTION_ORDER_STRATA:
+                stratum_df = filter_by_option_order(persona_df, sooner_is_a)
+                if stratum_df.empty:
+                    print(f"[{model_name}{persona_tag} / {option_order}] no trials, skipping.")
+                    continue
 
-            result = run_competence_checks_for_model(
-                stratum_df, config["competence_checks"], config.get("fitting"),
-                delay_grid_months,
-            )
+                result = run_competence_checks_for_model(
+                    stratum_df, config["competence_checks"], config.get("fitting"),
+                    delay_grid_months,
+                )
 
-            note = f" ({result['money_preference_note']})" if result["money_preference_note"] else ""
-            print(f"[{model_name} / {option_order}] "
-                  f"mono={result['monotonicity_passed']} "
-                  f"money={result['money_preference_passed']}{note} "
-                  f"indiff_nonincr={result['indifference_nonincreasing_passed']} "
-                  f"(violations={result['n_indifference_violations']}) "
-                  f"-> overall_passed={result['overall_passed']}")
-            print(f"  indifference x*(d): {result['indifference_amounts_by_delay']}")
+                note = f" ({result['money_preference_note']})" if result["money_preference_note"] else ""
+                print(f"[{model_name}{persona_tag} / {option_order}] "
+                      f"mono={result['monotonicity_passed']} "
+                      f"money={result['money_preference_passed']}{note} "
+                      f"indiff_nonincr={result['indifference_nonincreasing_passed']} "
+                      f"(violations={result['n_indifference_violations']}) "
+                      f"-> overall_passed={result['overall_passed']}")
+                print(f"  indifference x*(d): {result['indifference_amounts_by_delay']}")
 
-            for delay, amount in result["indifference_amounts_by_delay"].items():
-                indifference_plot_records.append({
+                for delay, amount in result["indifference_amounts_by_delay"].items():
+                    indifference_plot_records.append({
+                        "model_name": model_name,
+                        "persona_id": persona_id,
+                        "persona_discounting_group": discounting_group,
+                        "option_order": option_order,
+                        "delay_months": delay,
+                        "indifference_amount": amount,
+                        "indifference_nonincreasing_passed": result["indifference_nonincreasing_passed"],
+                    })
+
+                summary_rows.append({
                     "model_name": model_name,
+                    "persona_enabled": persona_enabled,
+                    "persona_id": persona_id,
+                    "persona_label": persona_label,
+                    "persona_discounting_group": discounting_group,
                     "option_order": option_order,
-                    "delay_months": delay,
-                    "indifference_amount": amount,
+                    "monotonicity_passed": result["monotonicity_passed"],
+                    "money_preference_passed": result["money_preference_passed"],
                     "indifference_nonincreasing_passed": result["indifference_nonincreasing_passed"],
+                    "n_indifference_violations": result["n_indifference_violations"],
+                    "overall_passed": result["overall_passed"],
+                    "k_lower_bound": result["k_lower_bound"],
+                    "k_upper_bound": result["k_upper_bound"],
                 })
-
-            summary_rows.append({
-                "model_name": model_name,
-                "persona_enabled": persona_enabled,
-                "option_order": option_order,
-                "monotonicity_passed": result["monotonicity_passed"],
-                "money_preference_passed": result["money_preference_passed"],
-                "indifference_nonincreasing_passed": result["indifference_nonincreasing_passed"],
-                "n_indifference_violations": result["n_indifference_violations"],
-                "overall_passed": result["overall_passed"],
-                "k_lower_bound": result["k_lower_bound"],
-                "k_upper_bound": result["k_upper_bound"],
-            })
 
     summary_df = pd.DataFrame(summary_rows)
     summary_csv_path = os.path.join(tables_dir, f"competence_checks{suffix}.csv")
