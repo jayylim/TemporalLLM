@@ -1,5 +1,5 @@
 {
-  "model": "qwen3.5:9b",
+  "model": "qwen2.5:7b-instruct-q8_0",
   "ollama_base_url": "http://host.docker.internal:11434/v1",
   "use_cai_dataset_context": false,
   "system_prompt": "",

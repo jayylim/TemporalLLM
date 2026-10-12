@@ -1,8 +1,8 @@
-# Preregistration: Kirby MCQ-27 Discounting in Local Qwen2.5 Models
+# Preregistration: Kirby MCQ-27 Discounting in Local LLMs
 
-Sibling project to `../temporal-discounting` (Waiting Game): same three models, same
-overall pipeline architecture, different instrument. Fixed before running the full
-N=30 experiment (pilot excluded).
+Sibling project to `../temporal-discounting` (Waiting Game): same Q8 models, same
+persona conditions and reasoning modes, different instrument. Fixed before running
+the full N=30 experiment (pilot excluded).
 
 ## Instrument
 
@@ -18,6 +18,29 @@ each item is sampled N=30 times at temperature=1, yielding an empirical P(choose
 per item rather than a single binary response, per
 [phase 1 extended.md](../phase%201%20extended.md)'s Kirby module design.
 
+## Models and independent variables
+
+Default config: `config_q8.yaml` (same Ollama Q8_0 tags as the Waiting Game):
+
+- `qwen2.5:7b-instruct-q8_0`
+- `qwen3:4b-instruct-2507-q8_0`
+- `qwen3:8b-q8_0`
+- `qwen3:32b-q8_0`
+- `qwen3.5:9b-q8_0`
+- `qwen3.5:27b-q8_0`
+- `qwen3.5:35b-a3b-q8_0`
+- `llama3.1:8b-instruct-q8_0`
+- `mistral:7b-instruct-q8_0`
+
+Other IVs (matched to Waiting Game; Kirby items/procedure unchanged):
+
+- **Reasoning mode**: `direct` | `cot` (`--mode`)
+- **Persona**: off (control) vs on × 8 behavioral lifestyles (`--persona` / `--no-persona`):
+  greater-discounting hypothesised — `substance_use`, `sugary_food`, `phone_social_media`,
+  `retail_spending`; lesser — `mindfulness`, `no_smoking_drinking`, `strategy_games`,
+  `exercise`. Persona text is prepended to the system prompt; `discounting_group` is
+  logging/analysis only and never shown to the model.
+
 ## Hypotheses
 
 - H1: Sorting the 27 items by their own indifference k, each model's P(choose LDR) is
@@ -29,15 +52,18 @@ per item rather than a single binary response, per
 - H2: Each model's hand-scoring consistency score (Kirby, 2000 / Kaplan et al., 2016) is
   >= 75%, the standard data-quality threshold for treating a k estimate as meaningful.
 - H3: Fitted discount rate (both `geomean_k` and the probabilistic-logistic `k`) differs
-  across model sizes (1.5b vs 3b vs 7b), with no directional prediction preregistered.
+  across models, with no directional prediction preregistered.
 - H4: Fitted k values differ from the approximate Kirby population benchmark
-  (`config.yaml: human_benchmark.kirby_median_k_per_day`).
+  (`config_q8.yaml: human_benchmark.kirby_median_k_per_day`).
 - H5 (magnitude effect, exploratory/reported not gating): `small_k > medium_k > large_k`,
   the classic human "more patience for larger rewards" pattern.
+- H6 (persona, exploratory): under greater-discounting personas, fitted k is higher than
+  under lesser-discounting personas and/or the persona-off control (same IV as Waiting Game).
 
-## Design (see `config.yaml` / `kirby27_items.yaml` for exact values)
+## Design (see `config_q8.yaml` / `kirby27_items.yaml` for exact values)
 
-- 27 fixed items x 30 samples x 3 models = 2,430 forced binary choices per reasoning mode.
+- 27 fixed items x 30 samples x 9 models = 7,290 forced binary choices per reasoning mode
+  (persona-off). Persona-on multiplies by 8 personas.
 - Order of A/B assignment randomized per trial to control position bias (same control as
   the sibling Waiting Game project).
 - Item wording variant: `verbatim` (exact instrument text) by default. A `paraphrased`
@@ -63,16 +89,15 @@ per item rather than a single binary response, per
 ## Analysis plan
 
 1. Parse raw completions to A/B (`parse_responses.py`); exclude/report parse failures, do
-   not impute.
-2. Run competence checks (`competence_checks.py`) per model **before** trusting a fit. A
-   model failing rank-monotonicity or the 75% consistency threshold is reported as "no
-   valid discount rate" and excluded from k comparison (but still shown in the summary
-   table).
-3. For models passing competence checks, both scoring methods above are fit
+   not impute. Preserve persona columns when present.
+2. Run competence checks (`competence_checks.py`) per model (× persona when enabled)
+   **before** trusting a fit. A condition failing rank-monotonicity or the 75% consistency
+   threshold is reported as "no valid discount rate" and excluded from k comparison (but
+   still shown in the summary table).
+3. For conditions passing competence checks, both scoring methods above are fit
    (`fit_discounting.py`).
-4. Compare fitted k across models and against the approximate human benchmark
-   (`analyze.py`, `compare_modes.py`); no p-value threshold is preregistered, as this is
-   an exploratory 3-model comparison, not a hypothesis test with inferential claims.
+4. Compare fitted k across models, modes, personas, and against the approximate human
+   benchmark (`analyze.py`, `compare_modes.py`); no p-value threshold is preregistered.
 
 ## Deviations from the sibling Waiting Game project
 
@@ -81,17 +106,17 @@ per item rather than a single binary response, per
   replaced by the rank-monotonicity check (H1) and the consistency-score gate (H2), which
   serve the same purpose (flagging models whose choices don't track option value at all).
 - Delay units are **days** here (matching the Kirby instrument's native units) vs.
-  **months** in the Waiting Game; `fitting.k_lower_bound`/`k_upper_bound` in `config.yaml`
+  **months** in the Waiting Game; `fitting.k_lower_bound`/`k_upper_bound` in `config_q8.yaml`
   are scaled accordingly (Kirby items' own k range is ~0.00016-0.25/day).
+- Stimulus is the fixed MCQ-27 item set (not a synthetic delay × amount grid). Models,
+  reasoning modes, and persona catalog match the Waiting Game.
 
 ## Notes / Deferred Items
 
 - Paraphrased-variant contamination check (see Design section): implemented in code,
   not yet executed -- would require doubling the call budget for this pass.
-- Prompt-mode axis (one-shot/two-shot/CoT, mirroring the sibling project's extension):
-  infrastructure is implemented (`kirby_game.build_few_shot_messages_for_mode`,
-  `--mode` flag across all scripts) but this preregistration covers whichever mode(s)
-  were actually executed -- see the run log / `results/tables/sanity_check_summary.md`
+- Prompt-mode axis historically also included one-shot/two-shot; current pipeline matches
+  Waiting Game with `direct` | `cot` only. See run log / `results/tables/sanity_check_summary.md`
   for which modes have completed data.
 - Convergent-validity correlation against the Waiting Game's independently-fit k (central
   deliverable of `phase 1 extended.md`'s Kirby module) is a natural next step once both

@@ -25,7 +25,8 @@ run is flagged low-quality/unreliable.
 Magnitude-effect check (reported, not gating): does small_k > medium_k >
 large_k hold (the classic human "more patience for larger rewards" effect)?
 
-Usage: python src/competence_checks.py [--config path/to/config.yaml] [--mode direct|cot]
+Usage: python src/competence_checks.py [--config path/to/config.yaml]
+       [--mode direct|cot] [--persona|--no-persona]
 """
 
 import argparse
@@ -33,8 +34,15 @@ import os
 
 import pandas as pd
 
-from config_utils import load_config, load_kirby_items, resolve_dir_path, mode_suffix, variant_suffix
+from config_utils import (
+    load_config,
+    load_kirby_items,
+    resolve_dir_path,
+    kirby_result_suffix,
+    persona_enabled_from_config,
+)
 from fit_discounting import hand_scoring_method
+from persona import iter_persona_groups
 from run_experiment import REASONING_MODES
 
 
@@ -80,17 +88,29 @@ def run_competence_checks_for_model(model_choices_df, items, competence_config):
     }
 
 
+def resolve_persona_enabled(args, config):
+    if getattr(args, "persona", False):
+        return True
+    if getattr(args, "no_persona", False):
+        return False
+    return persona_enabled_from_config(config)
+
+
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
     arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
+    persona_group = arg_parser.add_mutually_exclusive_group()
+    persona_group.add_argument("--persona", action="store_true")
+    persona_group.add_argument("--no-persona", action="store_true")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
+    persona_enabled = resolve_persona_enabled(args, config)
     items = load_kirby_items(config)
     processed_dir = resolve_dir_path(config["paths"]["data_processed_dir"])
     tables_dir = resolve_dir_path(config["paths"]["results_tables_dir"])
-    suffix = mode_suffix(args.mode) + variant_suffix(config["kirby"]["variant"])
+    suffix = kirby_result_suffix(args.mode, persona_enabled, config["kirby"]["variant"])
 
     choices_csv_path = os.path.join(processed_dir, f"choices{suffix}.csv")
     choices_df = pd.read_csv(choices_csv_path)
@@ -102,26 +122,38 @@ def main():
             print(f"[{model_name}] no parsed choices found, skipping.")
             continue
 
-        result = run_competence_checks_for_model(model_choices_df, items, config["competence_checks"])
+        for persona_id, discounting_group, persona_label, persona_df in iter_persona_groups(
+            model_choices_df
+        ):
+            persona_tag = f" / {persona_id}" if persona_id is not None else ""
+            result = run_competence_checks_for_model(
+                persona_df, items, config["competence_checks"]
+            )
 
-        print(f"[{model_name}] rank_monotonicity_passed={result['rank_monotonicity_passed']} "
-              f"(violations={result['n_rank_monotonicity_violations']}/26) "
-              f"consistency={result['overall_consistency']:.1%} (passed={result['consistency_passed']}) "
-              f"magnitude_effect_holds={result['magnitude_effect_holds']} "
-              f"-> overall_passed={result['overall_passed']}")
+            print(f"[{model_name}{persona_tag}] "
+                  f"rank_monotonicity_passed={result['rank_monotonicity_passed']} "
+                  f"(violations={result['n_rank_monotonicity_violations']}/26) "
+                  f"consistency={result['overall_consistency']:.1%} "
+                  f"(passed={result['consistency_passed']}) "
+                  f"magnitude_effect_holds={result['magnitude_effect_holds']} "
+                  f"-> overall_passed={result['overall_passed']}")
 
-        # Note: overall_consistency and magnitude_effect_holds are NOT
-        # duplicated here -- fit_discounting.py's discount_rates.csv already
-        # carries both (it computes the same hand-scoring result), and
-        # analyze.py merges the two tables on model_name; keeping both
-        # columns in both CSVs would produce ambiguous _x/_y suffixes.
-        summary_rows.append({
-            "model_name": model_name,
-            "rank_monotonicity_passed": result["rank_monotonicity_passed"],
-            "n_rank_monotonicity_violations": result["n_rank_monotonicity_violations"],
-            "consistency_passed": result["consistency_passed"],
-            "overall_passed": result["overall_passed"],
-        })
+            # Note: overall_consistency and magnitude_effect_holds are NOT
+            # duplicated here -- fit_discounting.py's discount_rates.csv already
+            # carries both (it computes the same hand-scoring result), and
+            # analyze.py merges the two tables on model_name (+ persona keys);
+            # keeping both columns in both CSVs would produce ambiguous _x/_y suffixes.
+            summary_rows.append({
+                "model_name": model_name,
+                "persona_enabled": persona_enabled,
+                "persona_id": persona_id,
+                "persona_label": persona_label,
+                "persona_discounting_group": discounting_group,
+                "rank_monotonicity_passed": result["rank_monotonicity_passed"],
+                "n_rank_monotonicity_violations": result["n_rank_monotonicity_violations"],
+                "consistency_passed": result["consistency_passed"],
+                "overall_passed": result["overall_passed"],
+            })
 
     summary_df = pd.DataFrame(summary_rows)
     summary_csv_path = os.path.join(tables_dir, f"competence_checks{suffix}.csv")

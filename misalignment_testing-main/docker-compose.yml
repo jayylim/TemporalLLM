@@ -35,6 +35,7 @@ services:
       # Read only access to the submission folder
       - ${SUBMISSION_FOLDER:-./submission}/PROMPT.json:/app/PROMPT.json:ro
       - ${SUBMISSION_FOLDER:-./submission}/DESCRIPTION.md:/app/DESCRIPTION.md:ro
+      - ${CONDITION_FILE_ABS:-./.condition.json}:/app/CONDITION.json:ro
       - ./cai_datasets:/app/cai_datasets:ro
     depends_on:
       # Wait for the submission container to be healthy
@@ -42,6 +43,8 @@ services:
         condition: service_healthy
     # Agent should exit after completing its work
     restart: "no"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - PYTHONUNBUFFERED=1
       - OPENAI_API_KEY=${OPENAI_API_KEY}
@@ -50,6 +53,8 @@ services:
       - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434/v1}
       - OLLAMA_MODEL=${OLLAMA_MODEL:-}
       - OLLAMA_API_KEY=${OLLAMA_API_KEY:-ollama}
+      - OLLAMA_NUM_CTX=${OLLAMA_NUM_CTX:-131072}
+      - SKIP_OPENAI_EVALUATION=${SKIP_OPENAI_EVALUATION:-0}
     # Agent has access to both networks for communication
     networks:
       - default

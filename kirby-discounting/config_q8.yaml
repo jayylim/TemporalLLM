@@ -1,0 +1,144 @@
+# Central config for the Kirby MCQ-27 intertemporal-choice pipeline.
+# Sibling project to ../temporal-discounting (Waiting Game): same Q8 models,
+# same persona conditions / reasoning modes, different instrument (fixed
+# human-normed MCQ-27 items instead of a synthetic delay x amount grid).
+#
+# Quantization: Q8_0 tags (Ollama library). Pull before running:
+#   ollama pull qwen2.5:7b-instruct-q8_0 … (one pull per model below).
+
+ollama:
+  base_url: "http://localhost:11434"
+  keep_alive: "5m"        # how long Ollama keeps a model resident after last request
+  request_timeout_s: 120   # CoT completions take longer than the 5-token direct-answer mode
+  max_retries: 3
+  retry_backoff_s: 2       # exponential backoff base: sleep = retry_backoff_s * (2 ** attempt)
+
+models:
+  - qwen2.5:7b-instruct-q8_0
+  - qwen3:4b-instruct-2507-q8_0
+  - qwen3:8b-q8_0
+  - qwen3:32b-q8_0
+  - qwen3.5:9b-q8_0                      # (ollama_client think:false still required)
+  - qwen3.5:27b-q8_0                     # (ollama_client think:false still required)
+  - qwen3.5:35b-a3b-q8_0                 # (ollama_client think:false still required)
+  - llama3.1:8b-instruct-q8_0
+  - mistral:7b-instruct-q8_0
+
+kirby:
+  items_file: "kirby27_items.yaml"
+  variant: "verbatim"       # "verbatim" (exact instrument wording) | "paraphrased" (contamination-control reword; see kirby_game.py)
+  n_samples_per_item: 30    # completions per item per model (LLM responses are stochastic, unlike the single-shot human instrument)
+  temperature: 1.0
+  num_predict: 5            # short completion budget (only need "A"/"B")
+  system_prompt: >-
+   You are playing a game where you are given two monetary options. One is available sooner, and one is available later. You must
+    choose one. When answering, respond with only the letter of the option
+    you choose (A or B). Do not explain your choice.
+  random_seed: 20260825     # seeds order randomization for reproducibility
+
+  # --- Chain-of-thought (CoT) reasoning mode ---
+  cot_system_prompt: >-
+    You are playing a game where you are given two monetary options. You must
+    choose one. Think step by step: compare the two amounts and how long you
+    would have to wait for each, and reason about which is the better deal.
+    After your reasoning, end your response with a final line, formatted
+    exactly as "FINAL ANSWER: A" or "FINAL ANSWER: B", with no other text on
+    that line.
+  cot_num_predict: 100
+
+# --- Behavioral persona (toggleable; matches ../temporal-discounting) ---
+# When enabled (--persona), the full Kirby item set is run once under each
+# persona below. Persona-off (--no-persona) is the control. discounting_group
+# is for results recording only and is never shown to the model.
+persona:
+  enabled: false
+  prompt_template: |
+    {persona_text}
+
+    Answer the following questions and task as this person would most likely sincerely believe and do, not what is safest, most neutral, or most socially acceptable.
+  personas:
+    # --- Greater discounting (hypothesised) ---
+    - id: substance_use
+      label: Substance use
+      discounting_group: greater
+      text: >-
+        You regularly buy and use drugs and alcohol, and it has been very
+        difficult to quit.
+    - id: sugary_food
+      label: Sugary food
+      discounting_group: greater
+      text: >-
+        You frequently buy sugary snacks and desserts throughout the day,
+        including between meals.
+    - id: phone_social_media
+      label: Phone and social media
+      discounting_group: greater
+      text: >-
+        You spend several hours each day using your phone and social media,
+        and frequently check your phone throughout the day.
+    - id: retail_spending
+      label: Retail spending
+      discounting_group: greater
+      text: >-
+        You frequently buy things that catch your attention while shopping
+        and buy more than you had originally planned.
+    # --- Lesser discounting (hypothesised) ---
+    - id: mindfulness
+      label: Mindfulness
+      discounting_group: lesser
+      text: >-
+        You regularly practice mindfulness and meditation as part of your
+        routine.
+    - id: no_smoking_drinking
+      label: No smoking or drinking
+      discounting_group: lesser
+      text: >-
+        You do not smoke or drink alcohol and have maintained this lifestyle
+        for many years.
+    - id: strategy_games
+      label: Strategy games
+      discounting_group: lesser
+      text: >-
+        You regularly play strategy games and tend to carefully consider
+        your moves before making them.
+    - id: exercise
+      label: Exercise
+      discounting_group: lesser
+      text: >-
+        You exercise regularly and track your progress after every workout.
+
+competence_checks:
+  min_consistency_score: 0.75         # Kaplan et al. (2016) convention: overall consistency below this -> low-quality/unreliable flag
+  rank_monotonicity_tolerance: 0.0    # allowed increase in P(choose LDR) as item k increases before counting as a violation
+  max_rank_monotonicity_violations: 2 # violations tolerated (out of 26 adjacent pairs) before failing the rank-order check
+
+fitting:
+  n_bootstrap: 1000
+  bootstrap_seed: 42
+  # Bounds for the probabilistic-logistic (MLE) method's free k parameter.
+  # Kirby's own item k-values span ~0.00016-0.25 (per day); bounds are set
+  # generously wider than that range so a fit landing at either bound is a
+  # clear signal of degenerate/unidentifiable behavior, analogous to the
+  # Waiting Game's PARAM_BOUNDS in ../temporal-discounting/src/fit_discounting.py.
+  k_lower_bound: 0.000001
+  k_upper_bound: 1.0
+  beta_lower_bound: 0.000001
+  beta_upper_bound: 20.0
+  low_sensitivity_beta_threshold: 0.05
+
+human_benchmark:
+  # Kirby, Petry & Bickel (1999) non-drug-using control group and the widely
+  # cited Kirby (2009) percentile norms place the general-population median
+  # geometric-mean k in roughly this range for the 27-item MCQ. Approximate,
+  # for reference overlay only (see PREREGISTRATION.md for caveats).
+  kirby_median_k_per_day: 0.016
+
+visualization:
+  n_sample_trials_to_plot_per_item: 10   # how many raw individual trials to overlay as jittered dots per item
+  trial_selection_seed: 123
+
+paths:
+  data_raw_dir: "data/raw"
+  data_processed_dir: "data/processed"
+  results_tables_dir: "results/tables"
+  results_figures_dir: "results/figures"

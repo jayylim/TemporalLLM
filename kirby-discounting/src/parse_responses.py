@@ -5,7 +5,8 @@ Identical parsing logic to ../temporal-discounting/src/parse_responses.py
 cot, long reasoning text preceding a "FINAL ANSWER: A/B" line). Unparseable
 responses are logged as parse failures (None) rather than guessed/imputed.
 
-Usage: python src/parse_responses.py [--config path/to/config.yaml] [--mode direct|cot]
+Usage: python src/parse_responses.py [--config path/to/config.yaml]
+       [--mode direct|cot] [--persona|--no-persona]
 """
 
 import argparse
@@ -15,7 +16,12 @@ import re
 
 import pandas as pd
 
-from config_utils import load_config, resolve_dir_path, mode_suffix, variant_suffix
+from config_utils import (
+    load_config,
+    resolve_dir_path,
+    kirby_result_suffix,
+    persona_enabled_from_config,
+)
 from run_experiment import REASONING_MODES, safe_filename_for_model
 
 FINAL_ANSWER_PATTERN = re.compile(r"final\s*answer\s*[:\-]?\s*\**\s*([ab])\b", re.IGNORECASE)
@@ -103,6 +109,11 @@ def parse_raw_jsonl_file(raw_jsonl_path):
                 "variant": trial_record.get("variant", "verbatim"),
                 "sample_index": trial_record["sample_index"],
                 "sooner_is_option_a": trial_record["sooner_is_option_a"],
+                "persona_enabled": trial_record.get("persona_enabled", False),
+                "persona_id": trial_record.get("persona_id"),
+                "persona_label": trial_record.get("persona_label"),
+                "persona_discounting_group": trial_record.get("persona_discounting_group"),
+                "persona_text": trial_record.get("persona_text"),
                 "raw_response_text": raw_response_text,
                 "raw_response_length_chars": len(raw_response_text or ""),
                 "final_answer_tag_found": has_final_answer_tag(raw_response_text),
@@ -120,27 +131,41 @@ def compute_parse_failure_rate(parsed_rows):
     return n_failures / n_total
 
 
+def resolve_persona_enabled(args, config):
+    if getattr(args, "persona", False):
+        return True
+    if getattr(args, "no_persona", False):
+        return False
+    return persona_enabled_from_config(config)
+
+
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
     arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
+    persona_group = arg_parser.add_mutually_exclusive_group()
+    persona_group.add_argument("--persona", action="store_true")
+    persona_group.add_argument("--no-persona", action="store_true")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
+    persona_enabled = resolve_persona_enabled(args, config)
     raw_dir = resolve_dir_path(config["paths"]["data_raw_dir"])
     processed_dir = resolve_dir_path(config["paths"]["data_processed_dir"])
-    suffix = mode_suffix(args.mode) + variant_suffix(config["kirby"]["variant"])
+    suffix = kirby_result_suffix(args.mode, persona_enabled, config["kirby"]["variant"])
 
     all_parsed_rows = []
     for model_name in config["models"]:
         raw_jsonl_path = os.path.join(raw_dir, f"{safe_filename_for_model(model_name)}{suffix}.jsonl")
         if not os.path.exists(raw_jsonl_path):
-            print(f"[{model_name} / {args.mode}] no raw data file found at {raw_jsonl_path}, skipping.")
+            print(f"[{model_name} / {args.mode} / persona={persona_enabled}] "
+                  f"no raw data file found at {raw_jsonl_path}, skipping.")
             continue
 
         model_parsed_rows = parse_raw_jsonl_file(raw_jsonl_path)
         parse_failure_rate = compute_parse_failure_rate(model_parsed_rows)
-        message = (f"[{model_name} / {args.mode}] parsed {len(model_parsed_rows)} trials, "
+        message = (f"[{model_name} / {args.mode} / persona={persona_enabled}] "
+                    f"parsed {len(model_parsed_rows)} trials, "
                     f"parse-failure rate = {parse_failure_rate:.1%}")
         if args.mode == "cot":
             n_with_tag = sum(1 for row in model_parsed_rows if row["final_answer_tag_found"])

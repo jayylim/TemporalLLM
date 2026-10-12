@@ -23,6 +23,8 @@ RUN_ID=""
 NO_TIMESTAMP=false
 REMOVE_IMAGES=false
 REPEAT_COUNT=1
+CONDITION_FILE=""
+OUTPUT_DIR_OVERRIDE=""
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -47,26 +49,34 @@ while [[ $# -gt 0 ]]; do
             REPEAT_COUNT="$2"
             shift 2
             ;;
+        -c|--condition)
+            CONDITION_FILE="$2"
+            shift 2
+            ;;
+        -o|--output-dir)
+            OUTPUT_DIR_OVERRIDE="$2"
+            shift 2
+            ;;
         -h|--help)
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  -f, --folder PATH       Path to submission folder (default: submission)"
+            echo "  -f, --folder PATH       Path to submission folder (default: scenarios/number_guessing)"
             echo "  -i, --id NAME           Add run id to output folder name"
             echo "  -n, --no-timestamp      Do not add timestamp to output folder name"
             echo "  -r, --remove-images     Remove Docker images after execution (default: false)"
             echo "      --repeat N          Run the full workflow N times sequentially (default: 1)"
-            echo "  -h, --help          Show this help message"
+            echo "  -c, --condition PATH    CONDITION.json (model + persona) mounted into the agent"
+            echo "  -o, --output-dir PATH   Explicit output directory (skips auto naming)"
+            echo "  -h, --help              Show this help message"
             echo ""
-            echo "Output folders are created as: outputs/<submission_folder_name>_<timestamp>_<run_id>"
+            echo "Batch sweeps (models × persona matching temporal-discounting):"
+            echo "  python src/run_conditions.py --scenario number_guessing --dry-run"
             echo ""
             echo "Examples:"
-            echo "  $0                                          # Output to outputs/submission_YYYYMMDD_HHMMSS"
-            echo "  $0 --folder my_submission                   # Output to outputs/my_submission_YYYYMMDD_HHMMSS"
-            echo "  $0 --id run1                                # Output to outputs/submission_YYYYMMDD_HHMMSS_run1"
-            echo "  $0 --folder sub2 --id run2                  # Output to outputs/sub2_YYYYMMDD_HHMMSS_run2"
-            echo "  $0 --folder sub2 --id run2 --no-timestamp   # Output to outputs/sub2_run2"
-            echo "  $0 --repeat 10                              # Run 10 sequential sessions"
+            echo "  $0                                          # Default scenario"
+            echo "  $0 --folder scenarios/sandbagging           # Specific scenario"
+            echo "  $0 --condition outputs/conditions/foo.json  # Pin model/persona"
             exit 0
             ;;
         *)
@@ -92,28 +102,58 @@ fi
 # Extract folder name from path (basename)
 SUBMISSION_FOLDER_NAME=$(basename "$SUBMISSION_FOLDER_PATH")
 
-# # Determine output directory name
-# if [ -z "$RUN_ID" ] && [ "$NO_TIMESTAMP" = true ]; then
-#     echo "Cannot use --no-timestamp without --id. Exiting."
-#     exit 1
-# fi
+# Resolve / create a default empty condition file when none provided
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_CONDITION="$SCRIPT_DIR/.condition.json"
+if [ -z "$CONDITION_FILE" ]; then
+    if [ ! -f "$DEFAULT_CONDITION" ]; then
+        cat > "$DEFAULT_CONDITION" << 'EOF'
+{
+  "model_name": null,
+  "persona_enabled": false,
+  "persona_id": null,
+  "persona_label": null,
+  "persona_discounting_group": null,
+  "persona_text": null,
+  "skip_openai_evaluation": false
+}
+EOF
+    fi
+    CONDITION_FILE="$DEFAULT_CONDITION"
+fi
+
+if [ ! -f "$CONDITION_FILE" ]; then
+    echo "Error: Condition file '$CONDITION_FILE' does not exist."
+    exit 1
+fi
+
+export CONDITION_FILE
+export CONDITION_FILE_ABS
+CONDITION_FILE_ABS=$(realpath "$CONDITION_FILE")
+export CONDITION_FILE_ABS
 
 for ((run_index = 1; run_index <= REPEAT_COUNT; run_index++)); do
-    # Create outputs directory and subdirectory for this submission
-    # Prefix with submission folder name
-    OUTPUT_DIR="scenarios/outputs_${SUBMISSION_FOLDER_PATH:10}/${SUBMISSION_FOLDER_NAME}"
+    if [ -n "$OUTPUT_DIR_OVERRIDE" ]; then
+        OUTPUT_DIR="$OUTPUT_DIR_OVERRIDE"
+        if [ "$REPEAT_COUNT" -gt 1 ]; then
+            OUTPUT_DIR="${OUTPUT_DIR}_run${run_index}"
+        fi
+    else
+        # Prefer flat outputs/ tree aligned with run_conditions.py
+        OUTPUT_DIR="outputs/${SUBMISSION_FOLDER_NAME}"
 
-    if [ "$NO_TIMESTAMP" != "true" ]; then
-        OUTPUT_DIR="${OUTPUT_DIR}_$(date +"%Y%m%d_%H%M%S")"
-    fi
+        if [ "$NO_TIMESTAMP" != "true" ]; then
+            OUTPUT_DIR="${OUTPUT_DIR}_$(date +"%Y%m%d_%H%M%S")"
+        fi
 
-    # Ensure unique directory names across repeated runs.
-    if [ "$REPEAT_COUNT" -gt 1 ]; then
-        OUTPUT_DIR="${OUTPUT_DIR}_run${run_index}"
-    fi
+        # Ensure unique directory names across repeated runs.
+        if [ "$REPEAT_COUNT" -gt 1 ]; then
+            OUTPUT_DIR="${OUTPUT_DIR}_run${run_index}"
+        fi
 
-    if [ -n "$RUN_ID" ]; then
-        OUTPUT_DIR="${OUTPUT_DIR}_${RUN_ID}"
+        if [ -n "$RUN_ID" ]; then
+            OUTPUT_DIR="${OUTPUT_DIR}_${RUN_ID}"
+        fi
     fi
 
     if [ -d "$OUTPUT_DIR" ]; then
@@ -122,10 +162,14 @@ for ((run_index = 1; run_index <= REPEAT_COUNT; run_index++)); do
     mkdir -p "$OUTPUT_DIR"
     LOG_FILE="$OUTPUT_DIR/run.log"
 
+    # Copy condition metadata into the output dir for provenance
+    cp "$CONDITION_FILE_ABS" "$OUTPUT_DIR/condition.json"
+
     # Start logging - capture ALL output from this point forward
     {
         echo "Running submission from: $SUBMISSION_FOLDER_PATH"
         echo "Submission folder name: $SUBMISSION_FOLDER_NAME"
+        echo "Condition file: $CONDITION_FILE_ABS"
         echo "Run iteration: ${run_index}/${REPEAT_COUNT}"
         echo "Output directory: $OUTPUT_DIR"
         echo "Log file: $LOG_FILE"
@@ -136,6 +180,23 @@ for ((run_index = 1; run_index <= REPEAT_COUNT; run_index++)); do
         # Note: We need to handle both relative and absolute paths
         # Convert to absolute path for docker-compose
         export SUBMISSION_FOLDER=$(realpath "$SUBMISSION_FOLDER_PATH")
+        export CONDITION_FILE_ABS
+
+        # Optional: surface model/persona from condition for compose env
+        if command -v python3 >/dev/null 2>&1; then
+            eval "$(python3 - << PY
+import json, shlex
+with open("$CONDITION_FILE_ABS") as f:
+    c = json.load(f)
+model = c.get("model_name") or ""
+print(f"export OLLAMA_MODEL={shlex.quote(str(model))}")
+print(f"export SKIP_OPENAI_EVALUATION={'1' if c.get('skip_openai_evaluation') else '0'}")
+num_ctx = c.get("ollama_num_ctx")
+if num_ctx is not None:
+    print(f"export OLLAMA_NUM_CTX={shlex.quote(str(int(num_ctx)))}")
+PY
+)"
+        fi
 
         # Run docker-compose with timeout (20 minutes = 1200 seconds)
         echo "Starting docker-compose with 20 minute timeout..."
@@ -150,6 +211,10 @@ for ((run_index = 1; run_index <= REPEAT_COUNT; run_index++)); do
         else
             echo "Docker-compose execution failed with exit code: $DOCKER_EXIT_CODE"
         fi
+
+        # Copy scenario prompts + DESCRIPTION so a later judge can score offline
+        cp "$SUBMISSION_FOLDER/PROMPT.json" "$OUTPUT_DIR/PROMPT.json" 2>/dev/null || true
+        cp "$SUBMISSION_FOLDER/DESCRIPTION.md" "$OUTPUT_DIR/DESCRIPTION.md" 2>/dev/null || true
 
         # Try to copy result.json from the agent container
         echo "Attempting to copy result.json from agent container..."
@@ -179,6 +244,13 @@ EOF
 }
 EOF
             fi
+        fi
+
+        echo "Attempting to copy agent_messages.json from agent container..."
+        if docker cp agent_controller:/app/agent_messages.json "$OUTPUT_DIR/agent_messages.json"; then
+            echo "Successfully copied agent_messages.json (judge-ready transcript)"
+        else
+            echo "No agent_messages.json in container (agent may have failed before the loop)."
         fi
 
         # Clean up - conditionally remove images based on flag
