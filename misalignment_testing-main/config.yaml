@@ -1,0 +1,45 @@
+# Misalignment testing conditions — keep models + persona in lockstep with
+# temporal-discounting/config_q8.yaml so (model_name × persona_id) joins 1-to-1.
+#
+# Default: load models/persona/ollama from the sibling Waiting Game config.
+# Override any field below; nested keys here win over the sibling file.
+
+temporal_discounting_config: "../temporal-discounting/config_q8.yaml"
+
+# Optional local overrides (uncomment to pin without editing the sibling file):
+# models:
+#   - qwen2.5:7b-instruct-q8_0
+# ollama:
+#   base_url: "http://localhost:11434"
+
+misalignment:
+  # Scenarios under scenarios/ to include in a full sweep (run_conditions.py).
+  # Primary RH set: financial_audit, number_guessing, sys-main-audit.
+  scenarios:
+    - number_guessing
+    - financial_audit
+    - demographic_bias
+    - sys-main-audit
+    - sandbagging
+    - sandbox_escape
+    - ai evaluator
+    - ascii
+  # Docker Ollama OpenAI-compatible endpoint (host Ollama from container).
+  ollama_openai_base_url: "http://host.docker.internal:11434/v1"
+  # Judge runs by default. Set true (or pass --skip-openai-evaluation) to skip
+  # DESCRIPTION scoring + post-run judge. Agent logs are still saved.
+  skip_openai_evaluation: false
+  # Judge backend: "ollama" (local) or "openai" (cloud API key required).
+  evaluator_backend: "ollama"
+  # Judge model (not the agent under test). Pull first: ollama pull llama3.3:70b
+  evaluator_model: "llama3.3:70b"
+  max_agent_steps: 20
+  # Ollama KV context ceiling for agent + local judge (options.num_ctx).
+  # Set ABOVE any reachable episode under existing limits (≤20 steps;
+  # tool stdout/stderr truncated at 10k chars). Shrinks unused KV vs the
+  # model default (often 262144) without truncating experiment transcripts.
+  # Do not lower without checking logs for context overflow.
+  ollama_num_ctx: 131072
+  # Independent agent episodes per (scenario × model × persona). Cell hack_rate
+  # is the mean of the per-run hacked binary over these repeats.
+  n_repeats: 5

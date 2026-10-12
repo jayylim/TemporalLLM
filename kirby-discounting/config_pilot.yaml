@@ -33,6 +33,62 @@ kirby:
     that line.
   cot_num_predict: 100
 
+# --- Behavioral persona (toggleable; matches ../temporal-discounting) ---
+persona:
+  enabled: false
+  prompt_template: |
+    {persona_text}
+
+    Answer the following questions and task as this person would most likely sincerely believe and do, not what is safest, most neutral, or most socially acceptable.
+  personas:
+    - id: substance_use
+      label: Substance use
+      discounting_group: greater
+      text: >-
+        You regularly buy and use drugs and alcohol, and it has been very
+        difficult to quit.
+    - id: sugary_food
+      label: Sugary food
+      discounting_group: greater
+      text: >-
+        You frequently buy sugary snacks and desserts throughout the day,
+        including between meals.
+    - id: phone_social_media
+      label: Phone and social media
+      discounting_group: greater
+      text: >-
+        You spend several hours each day using your phone and social media,
+        and frequently check your phone throughout the day.
+    - id: retail_spending
+      label: Retail spending
+      discounting_group: greater
+      text: >-
+        You frequently buy things that catch your attention while shopping
+        and buy more than you had originally planned.
+    - id: mindfulness
+      label: Mindfulness
+      discounting_group: lesser
+      text: >-
+        You regularly practice mindfulness and meditation as part of your
+        routine.
+    - id: no_smoking_drinking
+      label: No smoking or drinking
+      discounting_group: lesser
+      text: >-
+        You do not smoke or drink alcohol and have maintained this lifestyle
+        for many years.
+    - id: strategy_games
+      label: Strategy games
+      discounting_group: lesser
+      text: >-
+        You regularly play strategy games and tend to carefully consider
+        your moves before making them.
+    - id: exercise
+      label: Exercise
+      discounting_group: lesser
+      text: >-
+        You exercise regularly and track your progress after every workout.
+
 competence_checks:
   min_consistency_score: 0.75
   rank_monotonicity_tolerance: 0.0

@@ -1,0 +1,28 @@
+model_name,persona,persona_id,persona_label,persona_discounting_group,option_order,monotonicity_passed,money_preference_passed,indifference_nonincreasing_passed,competence_passed,k_always_reliable,valid_under_always_reliable_k,k,k_ci_low,k_ci_high,r_squared,n_indifference_points
+qwen2.5:7b-instruct-q8_0,on,mindfulness,Mindfulness,lesser,sooner_B,True,True,True,True,True,True,0.0097986182581725,0.0097986182581725,0.0220996860342288,0.556215016297527,7
+qwen3:4b-instruct-2507-q8_0,off,,,,pooled,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:4b-instruct-2507-q8_0,off,,,,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:4b-instruct-2507-q8_0,off,,,,sooner_B,True,True,True,True,True,True,5.651112883236467,3.106086308697919,5.651112883236467,,7
+qwen3:4b-instruct-2507-q8_0,on,exercise,Exercise,lesser,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:4b-instruct-2507-q8_0,on,mindfulness,Mindfulness,lesser,pooled,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:4b-instruct-2507-q8_0,on,mindfulness,Mindfulness,lesser,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:8b-q8_0,on,retail_spending,Retail spending,greater,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:8b-q8_0,on,sugary_food,Sugary food,greater,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:32b-q8_0,on,phone_social_media,Phone and social media,greater,pooled,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:32b-q8_0,on,phone_social_media,Phone and social media,greater,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:32b-q8_0,on,phone_social_media,Phone and social media,greater,sooner_B,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:32b-q8_0,on,retail_spending,Retail spending,greater,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:32b-q8_0,on,sugary_food,Sugary food,greater,pooled,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:32b-q8_0,on,sugary_food,Sugary food,greater,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:32b-q8_0,on,sugary_food,Sugary food,greater,sooner_B,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3:32b-q8_0,on,strategy_games,Strategy games,lesser,pooled,True,True,True,True,True,True,0.0020393184105196,0.0014815133366029,0.0034075682205304,-7.903002387064436,7
+qwen3:32b-q8_0,on,strategy_games,Strategy games,lesser,sooner_B,True,True,True,True,True,True,0.0014815133366029,0.0014815133366029,0.0014815133366029,,7
+qwen3.5:27b-q8_0,on,retail_spending,Retail spending,greater,pooled,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3.5:27b-q8_0,on,retail_spending,Retail spending,greater,sooner_A,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3.5:27b-q8_0,on,retail_spending,Retail spending,greater,sooner_B,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3.5:27b-q8_0,on,sugary_food,Sugary food,greater,pooled,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7
+qwen3.5:27b-q8_0,on,no_smoking_drinking,No smoking or drinking,lesser,pooled,True,True,True,True,True,True,0.0014815133366029,0.0014815133366029,0.0014815133366029,,7
+qwen3.5:27b-q8_0,on,no_smoking_drinking,No smoking or drinking,lesser,sooner_A,True,True,True,True,True,True,0.0020659747283225,0.0014815133366029,0.0032406100379464,-7.085482703525582,7
+qwen3.5:27b-q8_0,on,no_smoking_drinking,No smoking or drinking,lesser,sooner_B,True,True,True,True,True,True,0.0014815133366029,0.0014815133366029,0.0014815133366029,,7
+qwen3.5:27b-q8_0,on,strategy_games,Strategy games,lesser,sooner_A,True,True,True,True,True,True,0.0071957103436445,0.0058727122455548,0.0102041372827962,0.7603723210905297,7
+qwen3.5:35b-a3b-q8_0,off,,,,sooner_B,True,True,True,True,True,True,5.651112883236467,5.651112883236467,5.651112883236467,,7

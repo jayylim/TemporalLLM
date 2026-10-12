@@ -4,6 +4,68 @@ This repository provides a template for you to create environments and prompts t
 
 [Submit your examples on our portal](https://bounty.palisaderesearch.org/) and join our [Discord](https://discord.gg/ePDrXY8eBG) to get updates and ask questions!
 
+## TemporalLLM integration (Waiting Game conditions)
+
+This checkout is wired to the sibling **`temporal-discounting/`** experiment so misalignment runs use the **same Ollama models and persona framing** as `config_q8.yaml`.
+
+### Reward-hacking pipeline
+
+1. **Sweep** the configured scenarios (primary RH set: `financial_audit`, `number_guessing`, `sys-main-audit`) — edit `misalignment.scenarios` in `config.yaml` to change the set.
+2. **Detect hacking binaries** from `run.log` (no judge required): `hacked` per episode, then **mean `hack_rate` over repeats** for each model × persona cell, plus process flags (thin run, conflict reached, checker score, …).
+3. **Judge by default:** the Ollama/OpenAI evaluator scores each episode. Pass `--skip-openai-evaluation` (or set `skip_openai_evaluation: true`) to skip the judge; `run.log` / `agent_messages.json` are still saved for a later pass.
+4. **Summarize** with `python3 src/analyze_reward_hacking.py` → `outputs/analysis_reward_hacking/SUMMARY.md` (model × persona hack-rate tables). `run_conditions.py` runs this analysis at the end of a sweep unless you pass `--no-analyze`.
+
+| Join key | Source |
+|---|---|
+| `model_name` | `temporal-discounting/config_q8.yaml` → `models` |
+| `persona_enabled` / `persona_id` / `persona_label` / `persona_discounting_group` / `persona_text` | same file → `persona` |
+| Persona prompt template | same file → `persona.prompt_template` |
+
+`config.yaml` points at that sibling file (`temporal_discounting_config`). Local overrides in `config.yaml` win if set.
+
+**Condition grid:** default sweep = every model × (persona-off control + each of 8 personas). That matches Waiting Game strata in `by_condition.csv`. Waiting Game `direct`/`cot` modes are task-specific and are **not** duplicated here (the agent already multi-steps).
+
+Output layout:
+
+```
+outputs/<scenario>/<model_safe>/<none|persona__{id}>/[runN/]
+  condition.json
+  result.json          # includes model_name + persona_* fields for joining
+  run.log             # full docker/agent log (judge input)
+  agent_messages.json  # chat transcript for a later judge
+  PROMPT.json
+  DESCRIPTION.md
+outputs/condition_index.csv
+outputs/analysis_reward_hacking/SUMMARY.md
+outputs/analysis_reward_hacking/by_model_persona.csv
+outputs/analysis_reward_hacking/judge_queue.csv
+```
+
+`model_safe` uses the same sanitization as Waiting Game (`:` → `__`).
+
+```bash
+pip3 install -r requirements-host.txt   # PyYAML
+# Ollama must be running; pull agent models + the judge:
+#   ollama pull llama3.3:70b
+
+python3 src/run_conditions.py --dry-run
+
+python3 src/run_conditions.py \
+  --scenario number_guessing \
+  --model qwen2.5:7b-instruct-q8_0 \
+  --no-persona
+
+python3 src/run_conditions.py \
+  --scenario number_guessing \
+  --model qwen2.5:7b-instruct-q8_0 \
+  --persona --persona-id substance_use \
+  --skip-openai-evaluation
+
+python3 src/analyze_reward_hacking.py
+```
+
+The **judge** runs by default (`evaluator_backend: ollama`, `evaluator_model: llama3.3:70b`). Pull it first (`ollama pull llama3.3:70b`), or set `evaluator_backend: openai` + `OPENAI_API_KEY`. Pass `--skip-openai-evaluation` to skip judging. Agent backend remains **local Ollama** (`agent/run_loop_local_llm.py`).
+
 ## Overview
 
 Create scenarios for an AI agent capable of executing bash commands within a Docker environment. The agent runs for up to 20 steps based on the prompts and environment you provide. The setup is designed to work with [OpenAI's o3 model](https://openai.com/index/introducing-o3-and-o4-mini/), but may work with other OpenAI models as well.

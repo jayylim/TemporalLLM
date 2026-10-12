@@ -63,7 +63,7 @@ Each trial assigns sooner/later to A vs B with P(`sooner_is_option_a`)= 0.5 (i.e
 | Mode | Behavior |
 |---|---|
 | `direct` | Letter A/B only; `num_predict: 5` |
-| `cot` | Single call: step-by-step then `FINAL ANSWER: A/B`; `cot_num_predict: 100` |
+~~| `cot` | Single call: step-by-step then `FINAL ANSWER: A/B`; `cot_num_predict: 100` |~~
 
 Filename suffixes: `""`, `__cot`, plus `__persona` when persona is on.
 

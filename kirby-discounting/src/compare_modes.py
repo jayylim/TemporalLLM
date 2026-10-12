@@ -1,6 +1,6 @@
 """Cross-mode comparison: aggregates comparison_summary{mode}.csv across
-every reasoning mode that has been run, and writes a presentable
-sanity-check summary table -- Kirby analogue of
+every reasoning mode (and persona condition) that has been run, and writes
+a presentable sanity-check summary table -- Kirby analogue of
 ../temporal-discounting/src/compare_modes.py.
 
 Usage: python src/compare_modes.py [--config path/to/config.yaml]
@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from config_utils import load_config, resolve_dir_path, mode_suffix, variant_suffix
+from config_utils import load_config, resolve_dir_path, kirby_result_suffix
 from run_experiment import REASONING_MODES
 
 MODE_DISPLAY_LABELS = {
@@ -27,6 +27,7 @@ MODE_COLORS = {
     "cot": "#ff7f0e",
 }
 MODE_SORT_ORDER = {mode: index for index, mode in enumerate(REASONING_MODES)}
+PERSONA_CONDITIONS = (False, True)
 
 
 def checkmark(is_true):
@@ -42,26 +43,64 @@ def format_k_with_ci(row):
 def build_sanity_check_markdown(combined_df, human_k, variant):
     sortable_df = combined_df.copy()
     sortable_df["_mode_order"] = sortable_df["reasoning_mode"].map(MODE_SORT_ORDER)
-    sortable_df = sortable_df.sort_values(["model_name", "_mode_order"])
+    if "persona_enabled" in sortable_df.columns:
+        sortable_df["_persona_order"] = sortable_df["persona_enabled"].astype(bool)
+        sort_cols = ["model_name", "_mode_order", "_persona_order"]
+    else:
+        sort_cols = ["model_name", "_mode_order"]
+    if "persona_id" in sortable_df.columns:
+        sort_cols.append("persona_id")
+    sortable_df = sortable_df.sort_values(sort_cols)
 
-    header = (
-        "| Model | Mode | Rank Monotonicity | Consistency | Consistency Pass | "
-        "Magnitude Effect | logistic beta | logistic k Reliable? | **Valid Discount Rate** | "
-        "geomean k | logistic k [95% CI] |"
+    has_persona = (
+        "persona_enabled" in sortable_df.columns
+        and sortable_df["persona_enabled"].astype(bool).any()
     )
-    separator = "|---|---|---|---|---|---|---|---|---|---|---|"
+    if has_persona:
+        header = (
+            "| Model | Mode | Persona | Persona ID | Group | Rank Monotonicity | Consistency | "
+            "Consistency Pass | Magnitude Effect | logistic beta | logistic k Reliable? | "
+            "**Valid Discount Rate** | geomean k | logistic k [95% CI] |"
+        )
+        separator = "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
+    else:
+        header = (
+            "| Model | Mode | Rank Monotonicity | Consistency | Consistency Pass | "
+            "Magnitude Effect | logistic beta | logistic k Reliable? | **Valid Discount Rate** | "
+            "geomean k | logistic k [95% CI] |"
+        )
+        separator = "|---|---|---|---|---|---|---|---|---|---|---|"
+
     rows = [header, separator]
     for _, row in sortable_df.iterrows():
         mode_label = MODE_DISPLAY_LABELS.get(row["reasoning_mode"], row["reasoning_mode"])
         magnitude_effect_cell = (
             checkmark(row["magnitude_effect_holds"]) if pd.notna(row["magnitude_effect_holds"]) else "n/a"
         )
-        rows.append(
-            f"| {row['model_name']} | {mode_label} | {checkmark(row['rank_monotonicity_passed'])} | "
-            f"{row['overall_consistency']:.1%} | {checkmark(row['consistency_passed'])} | "
-            f"{magnitude_effect_cell} | {row['logistic_beta']:.4f} | {checkmark(row['logistic_k_is_reliable'])} | "
-            f"**{checkmark(row['valid_discount_rate'])}** | {row['geomean_k']:.5f} | {format_k_with_ci(row)} |"
-        )
+        if has_persona:
+            persona_label = "on" if bool(row.get("persona_enabled", False)) else "off"
+            persona_id = row.get("persona_id")
+            persona_id_label = "-" if pd.isna(persona_id) or persona_id is None else str(persona_id)
+            group = row.get("persona_discounting_group")
+            group_label = "-" if pd.isna(group) or group is None else str(group)
+            rows.append(
+                f"| {row['model_name']} | {mode_label} | {persona_label} | {persona_id_label} | "
+                f"{group_label} | {checkmark(row['rank_monotonicity_passed'])} | "
+                f"{row['overall_consistency']:.1%} | {checkmark(row['consistency_passed'])} | "
+                f"{magnitude_effect_cell} | {row['logistic_beta']:.4f} | "
+                f"{checkmark(row['logistic_k_is_reliable'])} | "
+                f"**{checkmark(row['valid_discount_rate'])}** | {row['geomean_k']:.5f} | "
+                f"{format_k_with_ci(row)} |"
+            )
+        else:
+            rows.append(
+                f"| {row['model_name']} | {mode_label} | {checkmark(row['rank_monotonicity_passed'])} | "
+                f"{row['overall_consistency']:.1%} | {checkmark(row['consistency_passed'])} | "
+                f"{magnitude_effect_cell} | {row['logistic_beta']:.4f} | "
+                f"{checkmark(row['logistic_k_is_reliable'])} | "
+                f"**{checkmark(row['valid_discount_rate'])}** | {row['geomean_k']:.5f} | "
+                f"{format_k_with_ci(row)} |"
+            )
     table_markdown = "\n".join(rows)
 
     modes_present = ", ".join(MODE_DISPLAY_LABELS.get(m, m) for m in sortable_df["reasoning_mode"].unique())
@@ -83,25 +122,43 @@ Modes included: {modes_present}. Item variant: {variant}. Approx. human benchmar
 - **geomean k**: hand-scoring composite k = geometric mean of small_k/medium_k/large_k, directly comparable to published human percentile norms.
 - **logistic k [95% CI]**: MLE-fit discount rate per day (bootstrap 95% CI), from the probabilistic logistic method, shown regardless of reliability.
 """
+    if has_persona:
+        legend += (
+            "\n- **Persona / Persona ID / Group**: behavioral persona framing "
+            "(on/off), specific lifestyle persona id, and researcher-only "
+            "greater/lesser discounting_group tag (never shown to the model).\n"
+        )
     return legend
 
 
-def load_available_mode_tables(tables_dir, modes, variant_suffix_str):
+def load_available_mode_tables(tables_dir, modes, variant):
     mode_tables = {}
     for reasoning_mode in modes:
-        csv_path = os.path.join(tables_dir, f"comparison_summary{mode_suffix(reasoning_mode)}{variant_suffix_str}.csv")
-        if not os.path.exists(csv_path):
-            print(f"[{reasoning_mode}] no comparison_summary found at {csv_path}, skipping "
-                  f"(run analyze.py --mode {reasoning_mode} first).")
-            continue
-        mode_df = pd.read_csv(csv_path)
-        mode_df["reasoning_mode"] = reasoning_mode
-        mode_tables[reasoning_mode] = mode_df
+        for persona_enabled in PERSONA_CONDITIONS:
+            suffix = kirby_result_suffix(reasoning_mode, persona_enabled, variant)
+            csv_path = os.path.join(tables_dir, f"comparison_summary{suffix}.csv")
+            if not os.path.exists(csv_path):
+                continue
+            mode_df = pd.read_csv(csv_path)
+            mode_df["reasoning_mode"] = reasoning_mode
+            if "persona_enabled" not in mode_df.columns:
+                mode_df["persona_enabled"] = persona_enabled
+            key = (reasoning_mode, persona_enabled)
+            mode_tables[key] = mode_df
+            print(f"[{reasoning_mode} / persona={persona_enabled}] loaded {csv_path}")
     return mode_tables
 
 
 def plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_dir):
-    model_names = sorted(combined_df["model_name"].unique())
+    # Persona-off only for the mode-comparison bars (cleaner main figure).
+    if "persona_enabled" in combined_df.columns:
+        plot_df = combined_df[~combined_df["persona_enabled"].astype(bool)].copy()
+    else:
+        plot_df = combined_df.copy()
+    if plot_df.empty:
+        plot_df = combined_df
+
+    model_names = sorted(plot_df["model_name"].unique())
     n_models = len(model_names)
     n_modes = len(modes_present)
     bar_width = 0.8 / max(n_modes, 1)
@@ -109,7 +166,10 @@ def plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_d
     figure, (axis_competence, axis_k) = plt.subplots(1, 2, figsize=(14, 5.5))
 
     for mode_index, reasoning_mode in enumerate(modes_present):
-        mode_df = combined_df[combined_df["reasoning_mode"] == reasoning_mode].set_index("model_name")
+        mode_df = plot_df[plot_df["reasoning_mode"] == reasoning_mode].set_index("model_name")
+        # If persona-on rows remain, take first row per model for the bar chart.
+        if mode_df.index.duplicated().any():
+            mode_df = mode_df[~mode_df.index.duplicated(keep="first")]
         x_positions = np.arange(n_models) + (mode_index - (n_modes - 1) / 2) * bar_width
         color = MODE_COLORS.get(reasoning_mode, None)
         label = MODE_DISPLAY_LABELS.get(reasoning_mode, reasoning_mode)
@@ -130,14 +190,14 @@ def plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_d
     axis_competence.set_xticklabels(model_names, rotation=20, ha="right")
     axis_competence.set_ylim(-0.1, 1.1)
     axis_competence.set_ylabel("Valid discount rate (all gates pass)")
-    axis_competence.set_title("Does prompting yield a valid Kirby-27 fit?")
+    axis_competence.set_title("Does prompting yield a valid Kirby-27 fit? (persona-off)")
     axis_competence.legend(fontsize=8)
 
     axis_k.axhline(human_k, color="black", linestyle="--", linewidth=1, label=f"human benchmark k={human_k}")
     axis_k.set_xticks(np.arange(n_models))
     axis_k.set_xticklabels(model_names, rotation=20, ha="right")
     axis_k.set_ylabel("geomean k per day (only shown where consistency_passed=True)")
-    axis_k.set_title("Hand-scoring geomean discount rate by mode")
+    axis_k.set_title("Hand-scoring geomean discount rate by mode (persona-off)")
     axis_k.legend(fontsize=8)
 
     figure.suptitle("Effect of reasoning mode on Kirby MCQ-27 results")
@@ -158,9 +218,9 @@ def main():
     tables_dir = resolve_dir_path(config["paths"]["results_tables_dir"])
     figures_dir = resolve_dir_path(config["paths"]["results_figures_dir"])
     human_k = config["human_benchmark"]["kirby_median_k_per_day"]
-    variant_suffix_str = variant_suffix(config["kirby"]["variant"])
+    variant = config["kirby"]["variant"]
 
-    mode_tables = load_available_mode_tables(tables_dir, REASONING_MODES, variant_suffix_str)
+    mode_tables = load_available_mode_tables(tables_dir, REASONING_MODES, variant)
     if not mode_tables:
         print("No comparison_summary tables found for any mode. Run the pipeline (run_experiment.py -> "
               "parse_responses.py -> competence_checks.py -> fit_discounting.py -> analyze.py) for at "
@@ -171,17 +231,27 @@ def main():
     combined_csv_path = os.path.join(tables_dir, "comparison_summary_by_mode.csv")
     combined_df.to_csv(combined_csv_path, index=False)
 
-    print(f"\n=== Cross-mode comparison ({', '.join(mode_tables.keys())}) ===")
-    print(combined_df[[
-        "model_name", "reasoning_mode", "rank_monotonicity_passed", "consistency_passed",
+    print_cols = [
+        "model_name", "reasoning_mode", "persona_enabled", "persona_id",
+        "rank_monotonicity_passed", "consistency_passed",
         "logistic_k_is_reliable", "valid_discount_rate", "geomean_k", "logistic_k",
-    ]].sort_values(["model_name", "reasoning_mode"]).to_string(index=False))
+    ]
+    print_cols = [c for c in print_cols if c in combined_df.columns]
+
+    print(f"\n=== Cross-mode comparison ===")
+    print(combined_df[print_cols].sort_values(
+        [c for c in ("model_name", "reasoning_mode", "persona_enabled", "persona_id") if c in print_cols]
+    ).to_string(index=False))
     print(f"\nWrote combined table to {combined_csv_path}")
 
-    figure_path = plot_competence_and_k_by_mode(combined_df, list(mode_tables.keys()), human_k, figures_dir)
+    modes_present = sorted(
+        {key[0] for key in mode_tables},
+        key=lambda m: MODE_SORT_ORDER.get(m, 99),
+    )
+    figure_path = plot_competence_and_k_by_mode(combined_df, modes_present, human_k, figures_dir)
     print(f"Wrote mode-comparison plot to {figure_path}")
 
-    sanity_check_markdown = build_sanity_check_markdown(combined_df, human_k, config["kirby"]["variant"])
+    sanity_check_markdown = build_sanity_check_markdown(combined_df, human_k, variant)
     sanity_check_path = os.path.join(tables_dir, "sanity_check_summary.md")
     with open(sanity_check_path, "w") as markdown_file:
         markdown_file.write(sanity_check_markdown)

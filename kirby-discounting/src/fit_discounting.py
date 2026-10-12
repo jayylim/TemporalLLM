@@ -21,7 +21,8 @@
    binarizing stochastic LLM outputs. Hand-scoring above is retained purely
    for comparability to human normative tables.
 
-Usage: python src/fit_discounting.py [--config path/to/config.yaml] [--mode direct|cot]
+Usage: python src/fit_discounting.py [--config path/to/config.yaml]
+       [--mode direct|cot] [--persona|--no-persona]
 """
 
 import argparse
@@ -32,7 +33,14 @@ import numpy as np
 import pandas as pd
 from scipy.optimize import minimize
 
-from config_utils import load_config, load_kirby_items, resolve_dir_path, mode_suffix, variant_suffix
+from config_utils import (
+    load_config,
+    load_kirby_items,
+    resolve_dir_path,
+    kirby_result_suffix,
+    persona_enabled_from_config,
+)
+from persona import iter_persona_groups
 from run_experiment import REASONING_MODES
 
 INITIAL_PARAMS = [0.01, 1.0]
@@ -259,17 +267,29 @@ def fit_discounting_for_model(model_choices_df, items, fitting_config):
     return {**hand_scoring_result, **logistic_result}
 
 
+def resolve_persona_enabled(args, config):
+    if getattr(args, "persona", False):
+        return True
+    if getattr(args, "no_persona", False):
+        return False
+    return persona_enabled_from_config(config)
+
+
 def main():
     arg_parser = argparse.ArgumentParser()
     arg_parser.add_argument("--config", default=None)
     arg_parser.add_argument("--mode", choices=REASONING_MODES, default="direct")
+    persona_group = arg_parser.add_mutually_exclusive_group()
+    persona_group.add_argument("--persona", action="store_true")
+    persona_group.add_argument("--no-persona", action="store_true")
     args = arg_parser.parse_args()
 
     config = load_config(args.config)
+    persona_enabled = resolve_persona_enabled(args, config)
     items = load_kirby_items(config)
     processed_dir = resolve_dir_path(config["paths"]["data_processed_dir"])
     tables_dir = resolve_dir_path(config["paths"]["results_tables_dir"])
-    suffix = mode_suffix(args.mode) + variant_suffix(config["kirby"]["variant"])
+    suffix = kirby_result_suffix(args.mode, persona_enabled, config["kirby"]["variant"])
 
     choices_csv_path = os.path.join(processed_dir, f"choices{suffix}.csv")
     choices_df = pd.read_csv(choices_csv_path)
@@ -282,17 +302,33 @@ def main():
             print(f"[{model_name}] no parsed choices found, skipping fit.")
             continue
 
-        fit_result = fit_discounting_for_model(model_choices_df, items, fitting_config)
-        reliability_note = "" if fit_result["logistic_k_is_reliable"] else "  [UNRELIABLE: low choice sensitivity or k at bound]"
-        print(f"[{model_name}] geomean_k={fit_result['geomean_k']:.5f} "
-              f"(small={fit_result['small_k']:.5f} medium={fit_result['medium_k']:.5f} large={fit_result['large_k']:.5f}) "
-              f"consistency={fit_result['overall_consistency']:.1%} | "
-              f"logistic_k={fit_result['logistic_k']:.5f} "
-              f"95% CI=[{fit_result['logistic_k_ci_low']:.5f}, {fit_result['logistic_k_ci_high']:.5f}] "
-              f"beta={fit_result['logistic_beta']:.3f}{reliability_note}")
+        for persona_id, discounting_group, persona_label, persona_df in iter_persona_groups(
+            model_choices_df
+        ):
+            persona_tag = f" / {persona_id}" if persona_id is not None else ""
+            fit_result = fit_discounting_for_model(persona_df, items, fitting_config)
+            reliability_note = (
+                "" if fit_result["logistic_k_is_reliable"]
+                else "  [UNRELIABLE: low choice sensitivity or k at bound]"
+            )
+            print(f"[{model_name}{persona_tag}] geomean_k={fit_result['geomean_k']:.5f} "
+                  f"(small={fit_result['small_k']:.5f} medium={fit_result['medium_k']:.5f} "
+                  f"large={fit_result['large_k']:.5f}) "
+                  f"consistency={fit_result['overall_consistency']:.1%} | "
+                  f"logistic_k={fit_result['logistic_k']:.5f} "
+                  f"95% CI=[{fit_result['logistic_k_ci_low']:.5f}, "
+                  f"{fit_result['logistic_k_ci_high']:.5f}] "
+                  f"beta={fit_result['logistic_beta']:.3f}{reliability_note}")
 
-        fit_row = {k: v for k, v in fit_result.items() if k != "p_ldr_by_item"}
-        fit_rows.append(dict(model_name=model_name, **fit_row))
+            fit_row = {k: v for k, v in fit_result.items() if k != "p_ldr_by_item"}
+            fit_rows.append(dict(
+                model_name=model_name,
+                persona_enabled=persona_enabled,
+                persona_id=persona_id,
+                persona_label=persona_label,
+                persona_discounting_group=discounting_group,
+                **fit_row,
+            ))
 
     fit_df = pd.DataFrame(fit_rows)
     fit_csv_path = os.path.join(tables_dir, f"discount_rates{suffix}.csv")
